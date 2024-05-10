@@ -1,0 +1,100 @@
+{
+  "name": "pixi-vscode",
+  "displayName": "pixi-vscode",
+  "description": "Pixi support for Visual Studio Code.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.89.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pixi-vscode.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "pixi-vscode.init",
+        "title": "Hello Extension"
+      }
+    ],
+    "configuration": {
+      "title": "Pixi",
+      "properties": {
+        "pixi-vscode.defaultProjectType": {
+          "type": "string",
+          "default": "pixi",
+          "enum": [
+            "pixi",
+            "pyproject"
+          ],
+          "description": "The default type of project to create"
+        },
+        "pixi-vscode.prefixAPIKey": {
+          "type": "string",
+          "default": "pfx-JBqNSrT9NoFbvlYfhMWfwpDGkv4K84RxIDqX",
+          "description": "The prefix API key"
+        },
+        "pixi-vscode.defaultChannels": {
+          "description": "The default channels to use when creating a new project",
+          "type": "array",
+          "scope": "resource",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "conda-forge"
+          ]
+        },
+        "pixi-vscode.defaultPlatforms": {
+          "description": "The default platforms to use when creating a new project",
+          "type": "array",
+          "scope": "resource",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "osx-64",
+            "osx-arm64"
+          ]
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.89.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.57.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.5",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.10.3",
+    "@types/react": "^18.3.1",
+    "graphql": "^16.8.1",
+    "react": "^18.3.1",
+    "vscode-cache": "^0.3.0"
+  }
+}
