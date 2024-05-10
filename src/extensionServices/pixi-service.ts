@@ -20,6 +20,13 @@ export class PixiService {
 		this.PixiCache = cache;
 	}
 
+	/**
+	 * Initializes the Pixi service.
+	 * Prompts the user to choose a project type, platform, and channels.
+	 * Returns an array of strings representing the arguments for initialization.
+	 * 
+	 * @returns A promise that resolves to an array of strings representing the arguments for initialization.
+	 */
 	async init(): Promise<string[]> {
 		let args: string[] = [PixiCommand.init];
 
@@ -43,6 +50,11 @@ export class PixiService {
 		return args;
 	}
 
+	/**
+	 * Prompts the user to choose a project type and returns the selected project type.
+	 * If no project type is selected, the default project type is returned.
+	 * @returns A promise that resolves to the selected project type.
+	 */
 	async chooseProjectType(): Promise<string> {
 		const defaultProjectType: string =
 			vscode.workspace
