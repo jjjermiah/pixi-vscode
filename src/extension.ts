@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import { info, warn, error } from "./common/logging";
 import { Pixi } from "./environmentManagers/pixi";
-import { PixiExtensionService } from "./extensionServices/vscode-service";
+import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
 const Cache = require("vscode-cache");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -29,6 +29,12 @@ export function activate(context: vscode.ExtensionContext) {
 				await pxe.init(uri);
 			}
 		)
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("pixi-vscode.clearCache", async () => {
+			cache.flush();
+		})
 	);
 }
 

@@ -15,13 +15,32 @@
     "commands": [
       {
         "command": "pixi-vscode.helloWorld",
-        "title": "Hello World"
+        "title": "Pixi: Hello World"
       },
       {
         "command": "pixi-vscode.init",
-        "title": "Hello Extension"
+        "title": "Pixi: Init"
+      },
+      {
+        "command": "pixi-vscode.clearCache",
+        "title": "Clear Extension Cache",
+        "category": "Pixi"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "pixi-vscode.init",
+          "group": "1_pixi",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "pixi-vscode.addPackages",
+          "group": "1_pixi",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
+    },
     "configuration": {
       "title": "Pixi",
       "properties": {

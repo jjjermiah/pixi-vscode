@@ -15,7 +15,7 @@ export const GET_PACKAGE_LATEST_VERSION = gql`
 	}
 `;
 
-export const FIND_PACKAGE_VARIANTS = gql`
+export const FIND_PACKAGES = gql`
 	query findPackages($packageName: String!, $limit: Int = 20) {
 		packages(
 			limit: $limit

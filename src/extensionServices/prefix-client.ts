@@ -1,11 +1,8 @@
 // services/client.ts
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
-import {
-	GET_PACKAGE_LATEST_VERSION,
-	FIND_PACKAGE_VARIANTS,
-	GET_USER_CHANNELS,
-} from "./queries";
+import * as queries from "./queries";
+
 import * as vscode from "vscode";
 
 export class PrefixClient {
@@ -31,7 +28,7 @@ export class PrefixClient {
 
 	async getAllChannels() {
 		const result = await this.instance.query({
-			query: GET_USER_CHANNELS,
+			query: queries.GET_USER_CHANNELS,
 			variables: {
 				page: 0,
 			},
@@ -47,7 +44,7 @@ export class PrefixClient {
 
 		for (let i = 0; i < totalPages; i++) {
 			const result = await this.instance.query({
-				query: GET_USER_CHANNELS,
+				query: queries.GET_USER_CHANNELS,
 				variables: {
 					page: i,
 				},
@@ -67,7 +64,7 @@ export class PrefixClient {
 
 	async getPackages(packageName: string) {
 		const result = await this.instance.query({
-			query: FIND_PACKAGE_VARIANTS,
+			query: queries.FIND_PACKAGES,
 			variables: {
 				packageName: packageName,
 			},

@@ -24,7 +24,7 @@ export class PixiService {
 	 * Initializes the Pixi service.
 	 * Prompts the user to choose a project type, platform, and channels.
 	 * Returns an array of strings representing the arguments for initialization.
-	 * 
+	 *
 	 * @returns A promise that resolves to an array of strings representing the arguments for initialization.
 	 */
 	async init(): Promise<string[]> {
@@ -132,7 +132,14 @@ export class PixiService {
 				defaultChannels.includes(item.label)
 			),
 		}).then((channels) => {
-			this.PixiCache.put("selectedChannels", channels);
+			// combination of previously selected channels and newly selected channels
+			// only unique values are stored
+			this.PixiCache.put(
+				"selectedChannels",
+				Array.from(
+					new Set([...previouslySelectedChannels, ...channels])
+				)
+			);
 			return channels;
 		});
 
@@ -192,14 +199,12 @@ export class PixiService {
 				(platform: any) => {
 					return {
 						label: platform,
-						description: "(Added in settings)",
 					};
 				}
 			),
 			"Other Platforms": otherPlatforms.map((platform: any) => {
 				return {
 					label: platform,
-					description: "(Added in settings)",
 				};
 			}),
 		});
