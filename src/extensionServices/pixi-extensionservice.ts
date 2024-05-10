@@ -59,8 +59,8 @@ export class PixiExtensionService {
 
 		console.log("pixi " + args.join(" "));
 
-		// if (updateWorkspaceFolder) {
-		// 	this.vse.openFolderInCurrentWindow(pixi_project_dir.fsPath);
-		// }
+		if (updateWorkspaceFolder) {
+			this.vse.openFolderInCurrentWindow(pixi_project_dir.fsPath);
+		}
 	}
 }

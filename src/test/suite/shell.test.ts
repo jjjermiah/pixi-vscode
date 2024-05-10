@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { execShellWithTimeout } from "../common/shell";
+import { execShellWithTimeout } from "../../common/shell";
 
 suite("Shell Test Suite", () => {
 	test("execShellWithTimeout should resolve with command output", async () => {

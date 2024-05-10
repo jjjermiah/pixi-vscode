@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import * as notify from "../common/logging";
 const Cache = require("vscode-cache");
-import { PrefixClient } from "./prefix-client";
+import { PrefixClient } from "../prefixAPI/prefix-client";
 import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
 
 import { Pixi } from "../environmentManagers/pixi";

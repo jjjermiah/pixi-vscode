@@ -1,15 +1,19 @@
 {
   "name": "pixi-vscode",
   "displayName": "pixi-vscode",
-  "description": "Pixi support for Visual Studio Code.",
+  "publisher": "jjjermiah",
+  "description": "Pixi support for Visual Studio Code",
   "version": "0.0.1",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.89.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -93,7 +97,7 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test --coverage true --coverage-output cov ./src/test"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
@@ -104,8 +108,14 @@
     "@vscode/test-cli": "^0.0.8",
     "@vscode/test-electron": "^2.3.9",
     "eslint": "^8.57.0",
+    "glob": "^10.3.14",
+    "mocha": "^10.4.0",
+    "nyc": "^15.1.0",
+    "semantic-release": "^23.1.1",
+    "semantic-release-vsce": "^5.7.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
+    "vscode-test": "^1.6.1",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
   },
