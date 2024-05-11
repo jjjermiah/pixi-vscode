@@ -27,8 +27,11 @@
       },
       {
         "command": "pixi-vscode.clearCache",
-        "title": "Clear Extension Cache",
-        "category": "Pixi"
+        "title": "Pixi: Clear Extension Cache"
+      },
+      {
+        "command": "pixi-vscode.addChannel",
+        "title": "Pixi: Add Channels"
       }
     ],
     "menus": {
@@ -39,7 +42,7 @@
           "when": "explorerResourceIsFolder"
         },
         {
-          "command": "pixi-vscode.addPackages",
+          "command": "pixi-vscode.addChannel",
           "group": "1_pixi",
           "when": "explorerResourceIsFolder"
         }

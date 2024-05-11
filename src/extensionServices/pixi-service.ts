@@ -7,11 +7,30 @@ import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
 
 import { Pixi } from "../environmentManagers/pixi";
 
-export class PixiService {
+interface IPixiService {
+	init(): Promise<string[]>;
+	chooseProjectType(): Promise<string>;
+	choosePlatform(): Promise<string[]>;
+	chooseChannels(): Promise<string[]>;
+	getEnvironmentNames(): Promise<string[] | undefined>;
+	getEnvironmentPrefixes(): Promise<string[] | undefined>;
+	getEnvironmentInfo(): Promise<any | undefined>;
+	getEnvironmentTasks(): Promise<any | undefined>;
+}
+
+/**
+ * Represents the Pixi service.
+ */
+export class PixiService implements IPixiService {
 	private pixi: Pixi;
 	private PixiCache: any;
 	private prefixClient = new PrefixClient();
 
+	/**
+	 * Initializes a new instance of the PixiService class.
+	 *
+	 * @param cache - The cache object for this user's session.
+	 */
 	constructor(cache: typeof Cache) {
 		this.pixi = new Pixi(
 			"pixi",
@@ -51,6 +70,17 @@ export class PixiService {
 	}
 
 	/**
+	 *
+	 */
+	async addChannel(definedChannels?: string[]): Promise<string[]> {
+		let args: string[] = [PixiCommand.addChannel, "add"];
+		await this.chooseChannels(definedChannels).then((channels) => {
+			args.push(...channels);
+		});
+		return args;
+	}
+
+	/**
 	 * Prompts the user to choose a project type and returns the selected project type.
 	 * If no project type is selected, the default project type is returned.
 	 * @returns A promise that resolves to the selected project type.
@@ -80,9 +110,11 @@ export class PixiService {
 	/**
 	 * Asks the user to choose additional channels and returns the selected channels.
 	 *
+	 * @param definedChannels - An optional array of channel names that are
+	 *  already defined.
 	 * @returns A promise that resolves with an array of selected channel names.
 	 */
-	async chooseChannels(): Promise<string[]> {
+	async chooseChannels(definedChannels?: string[]): Promise<string[]> {
 		const defaultChannels: string[] = vscode.workspace
 			.getConfiguration("pixi-vscode")
 			.get<string[]>("defaultChannels", []);
@@ -100,7 +132,7 @@ export class PixiService {
 			);
 		});
 
-		const items = await this.prepareItems({
+		let items: vscode.QuickPickItem[] = await this.prepareItems({
 			"Default Channels": defaultChannels.map((platform: any) => {
 				return {
 					label: platform,
@@ -122,15 +154,24 @@ export class PixiService {
 				};
 			}),
 		});
-
+		// remove all the channels in definedChannels from the items
+		let selectedItems: vscode.QuickPickItem[] = [];
+		if (definedChannels) {
+			items = items.filter(
+				(item) => !definedChannels.includes(item.label)
+			);
+			selectedItems = [];
+		} else {
+			selectedItems = items.filter((item) =>
+				defaultChannels.includes(item.label)
+			);
+		}
 		const selectedChannels = await this.showQuickPick({
 			title: "Select Channels",
 			placeholder: "Select Channels",
 			items: items,
 			canSelectMany: true,
-			selectedItems: items.filter((item) =>
-				defaultChannels.includes(item.label)
-			),
+			selectedItems: selectedItems,
 		}).then((channels) => {
 			// combination of previously selected channels and newly selected channels
 			// only unique values are stored
@@ -142,8 +183,6 @@ export class PixiService {
 			);
 			return channels;
 		});
-
-		// return selectedChannels;
 
 		/**
 		 * Use the selected channels to query the allChannels array
@@ -286,18 +325,72 @@ export class PixiService {
 		};
 	}
 
+	/**
+	 * Locate a pixi.toml or pyproject.toml file in a given directory and return the path to it.
+	 * @param dir - The directory to search for the file.
+	 * @returns A promise that resolves to the path of the found file.
+	 */
+	public async findProjectFile(dir: string): Promise<string> {
+		if (dir === undefined) {
+			console.log("findProjectFile: dir is undefined");
+			return "";
+		}
+		const files = await vscode.workspace.fs.readDirectory(
+			vscode.Uri.file(dir)
+		);
+		// pixi.toml or pyproject.toml only
+		const projectFile = files.find(
+			(file) =>
+				file[1] === vscode.FileType.File &&
+				(file[0] === "pixi.toml" || file[0] === "pyproject.toml")
+		);
+
+		if (projectFile) {
+			return vscode.Uri.file(`${dir}/${projectFile[0]}`).fsPath;
+		}
+
+		console.log("findProjectFile: No project file found");
+		return "";
+	}
+
+	public async getChannels(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.pixi.Channels(manifestPath);
+	}
+
+	/**
+	 * Retrieves the names of the available environments.
+	 *
+	 * @returns A promise that resolves to an array of environment names.
+	 */
 	public async getEnvironmentNames(): Promise<string[] | undefined> {
 		return this.pixi.EnvironmentNames();
 	}
 
+	/**
+	 * Retrieves the prefixes of the available environments.
+	 *
+	 * @returns A promise that resolves to an array of environment prefixes.
+	 */
 	public async getEnvironmentPrefixes(): Promise<string[] | undefined> {
 		return this.pixi.EnvironmentPrefixes();
 	}
 
+	/**
+	 * Retrieves information about the current environment.
+	 *
+	 * @returns A promise that resolves to the environment information.
+	 */
 	public async getEnvironmentInfo(): Promise<any | undefined> {
 		return this.pixi.EnvironmentInfo();
 	}
 
+	/**
+	 * Retrieves the tasks of the current environment.
+	 *
+	 * @returns A promise that resolves to the environment tasks.
+	 */
 	public async getEnvironmentTasks(): Promise<any | undefined> {
 		return this.pixi.Tasks();
 	}

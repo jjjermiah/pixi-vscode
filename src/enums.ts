@@ -26,9 +26,15 @@ export enum PixiProjectType {
 }
 
 export enum PixiCommand {
+	// Maybe find a way to locate the pixi binary or implement for a future option of asking user to locate it
+	tool = "pixi",
+
+	// Pixi commands
 	init = "init",
 	install = "install",
 	add = "add",
 	remove = "remove",
 	list = "list",
+
+	addChannel = "project channel"
 }

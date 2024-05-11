@@ -65,6 +65,12 @@ export class VSCodeExtensionService {
 		);
 	}
 
+	public async runPixiCommand(args: string[]): Promise<void> {
+		// add args to "Pixi " command
+		const command = PixiCommand.tool + " " + args.join(" ");
+		await this.openTerminalAndRunCommand(command);
+	}
+
 	public async openTerminalAndRunCommand(command: string): Promise<void> {
 		const terminal = await this.getActiveTerminal();
 		//TODO add config option to show terminal
@@ -73,7 +79,8 @@ export class VSCodeExtensionService {
 
 		await vscode.commands.executeCommand("workbench.action.terminal.clear");
 		terminal.sendText(command);
-
+		// Return true if command was successful
+		
 		// terminal.dispose();
 	}
 

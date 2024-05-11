@@ -28,9 +28,13 @@ export class Pixi {
 			});
 	}
 
-	public async getPixiInfo(): Promise<PixiInfo | undefined> {
+	public async getPixiInfo(
+		manifestPath?: string
+	): Promise<PixiInfo | undefined> {
 		const info = await execShellWithTimeout(
-			`${this.command} info --json`,
+			`${this.command} info --json ${
+				manifestPath ? `--manifest-path ${manifestPath}` : ""
+			}`,
 			5000,
 			this.cwd
 		)
@@ -46,18 +50,39 @@ export class Pixi {
 		return this.getPixiInfo().then((info) => info?.platform);
 	}
 
-	public async EnvironmentInfo(): Promise<environments_info[] | undefined> {
-		return this.getPixiInfo().then((info) => info?.environments_info);
+	public async Channels(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		const allChannels: string[] = [];
+		await this.EnvironmentInfo(manifestPath).then((envs) => {
+			envs?.forEach((env) => {
+				allChannels.push(...env.channels);
+			});
+		});
+		// remove duplicates
+		return Array.from(new Set(allChannels));
 	}
 
-	public async EnvironmentNames(): Promise<string[] | undefined> {
-		return this.EnvironmentInfo().then((info) =>
+	public async EnvironmentInfo(
+		manifestPath?: string
+	): Promise<environments_info[] | undefined> {
+		return this.getPixiInfo(manifestPath ? manifestPath : undefined).then(
+			(info) => info?.environments_info
+		);
+	}
+
+	public async EnvironmentNames(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.EnvironmentInfo(manifestPath).then((info) =>
 			info?.map((env) => env.name)
 		);
 	}
 
-	public async EnvironmentPrefixes(): Promise<string[] | undefined> {
-		return this.EnvironmentInfo().then((info) =>
+	public async EnvironmentPrefixes(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.EnvironmentInfo(manifestPath).then((info) =>
 			info?.map((env) => env.prefix)
 		);
 	}
