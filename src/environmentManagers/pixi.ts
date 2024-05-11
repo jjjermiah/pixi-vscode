@@ -87,6 +87,14 @@ export class Pixi {
 		);
 	}
 
+	public async Features(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.EnvironmentInfo(manifestPath)
+			.then((info) => info?.flatMap((env) => env.features))
+			.then((features) => Array.from(new Set(features)));
+	}
+
 	public async Tasks(): Promise<PixiTask[] | undefined> {
 		return this.EnvironmentInfo().then((info) =>
 			// for each task within an environment, create a PixiTask

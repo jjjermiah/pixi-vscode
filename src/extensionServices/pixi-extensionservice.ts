@@ -18,15 +18,26 @@ export class PixiExtensionService {
 		this.pixi_service = new PixiService(cache);
 	}
 
+	/**
+	 * Initialize a new Pixi project through extension
+	 *
+	 * @param uri - the uri of the folder to initialize the project in
+	 * @returns 		- void
+	 */
 	async init(uri: vscode.Uri) {
+		// The folder to initialize the project in
+
 		let pixi_project_dir: vscode.Uri;
 
 		// if we are opening a new folder in the workspace
+
 		let updateWorkspaceFolder = false;
 
 		/**
+		 * LOGIC:
 		 * if : uri is not null, then right-clicked on a folder in explorer
-		 * else if : no workspace folders open, then pick a folder and prompt for project name
+		 * else if : no workspace folders open, then choose a folder and prompt for
+		 * 						project name
 		 * else : if workspace folders open, then choose one
 		 */
 		if (uri) {
@@ -36,31 +47,32 @@ export class PixiExtensionService {
 			const projectName = await this.vse.promptForProjectName();
 			if (!projectName) return;
 			pixi_project_dir = vscode.Uri.joinPath(parent_dir, projectName);
-			// create a directory
-			fs.mkdir(pixi_project_dir.fsPath, { recursive: true }, (err) => {
-				if (err) {
-					notify.error("Failed to create directory: " + err);
-					return;
-				}
-			});
-			notify.info(
-				"Created project directory: " + pixi_project_dir.fsPath
-			);
 
-			// after pixi init, open the folder in the current window
+			// true so that after pixi init, open the chosen folder in the current window
 			updateWorkspaceFolder = true;
 		} else {
 			pixi_project_dir = (await this.vse.chooseWorkspaceFolder())!.uri;
 		}
 		if (!pixi_project_dir) {
-			notify.error("Failed to get project directory");
+			notify.error("PXS init: Failed to get project directory");
 			return;
 		}
 
 		let args: string[] = await this.pixi_service.init();
+		if (!args) {
+			notify.error("PXS init: Failed to get init args");
+			return;
+		}
 		args.push(pixi_project_dir.fsPath);
 
-		console.log("pixi " + args.join(" "));
+		// create a directory
+		fs.mkdir(pixi_project_dir.fsPath, { recursive: true }, (err) => {
+			if (err) {
+				notify.error("Failed to create directory: " + err);
+				return;
+			}
+		});
+		notify.info("Created project directory: " + pixi_project_dir.fsPath);
 
 		if (updateWorkspaceFolder) {
 			this.vse.openFolderInCurrentWindow(pixi_project_dir.fsPath);
@@ -99,6 +111,49 @@ export class PixiExtensionService {
 		args.push(`--manifest-path ${manifestPath}`);
 		console.log("pixi " + args.join(" "));
 		this.vse.runPixiCommand(args);
+	}
+
+	async addPackages(uri: vscode.Uri) {
+		let pixi_project_dir: vscode.Uri;
+		if (uri) {
+			pixi_project_dir = uri;
+		} else if (await this.vse.isEmptyWorkspace()) {
+			notify.error("No workspace folders open");
+			return;
+		} else {
+			pixi_project_dir = (await this.vse.chooseWorkspaceFolder())!.uri;
+		}
+
+		const manifestPath = await this.findManifestFile(
+			pixi_project_dir.fsPath
+		);
+		const args = await this.pixi_service.addPackages();
+		// if user wants to add to a specific environment
+		const feature = await this.pixi_service
+			.getEnvironmentFeatures(manifestPath)
+			.then((features) => {
+				if (!features) console.log("No features found");
+				return this.pixi_service.showQuickPick({
+					title: "Feature to add packages to",
+					items: features!.map((feature) => {
+						return { label: feature, description: "" };
+					}),
+					placeholder: "Select a feature",
+					canSelectMany: false,
+					selectedItems: [
+						{
+							label: "default",
+							description: "",
+						},
+					],
+				});
+			});
+		if (feature) {
+			args.push(`--feature ${feature}`);
+		}
+		args.push(`--manifest-path ${manifestPath}`);
+
+		console.log("pixi " + args.join(" "));
 	}
 
 	async findManifestFile(pixi_project_dir: string) {

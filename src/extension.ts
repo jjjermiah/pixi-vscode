@@ -33,9 +33,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"pixi-vscode.addChannel",
+			"pixi-vscode.addChannels",
 			async (uri: vscode.Uri) => {
 				await pxe.addChannels(uri);
+			}
+		)
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"pixi-vscode.addPackages",
+			async (uri: vscode.Uri) => {
+				await pxe.addPackages(uri);
 			}
 		)
 	);

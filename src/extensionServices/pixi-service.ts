@@ -39,6 +39,70 @@ export class PixiService implements IPixiService {
 		this.PixiCache = cache;
 	}
 
+	async addPackages(definedPackages?: string[]): Promise<string[]> {
+		let args: string[] = [PixiCommand.add];
+		await this.choosePackages(definedPackages).then((packages) => {
+			args.push(...packages);
+		});
+		return args;
+	}
+
+	/**
+	 * Prompts the user to choose packages and returns the selected packages.
+	 *
+	 * @param definedPackages - An optional array of package names that are
+	 *  already defined.
+	 * @returns A promise that resolves with an array of selected package names.
+	 */
+	async choosePackages(definedPackages?: string[]): Promise<string[]> {
+		const qp = vscode.window.createQuickPick();
+		qp.title =
+			"Enter package name. Choose an optiopn from the dropdown by pressing <space>";
+		qp.placeholder = "Start typing to search for packages...";
+		qp.canSelectMany = true;
+		qp.show();
+		let progressCounter = 0;
+		const searchAndUpdate = async (userInput: string) => {
+			if (!userInput.trim()) {
+				qp.items = [];
+				return;
+			}
+			qp.busy = true;
+			progressCounter += 1;
+
+			const packageChannels: {
+				channel: string;
+				package: string;
+				summary: string;
+				version: string;
+			}[] = await this.prefixClient.getPackages(userInput);
+			progressCounter -= 1;
+
+			if (!progressCounter) {
+				qp.busy = false;
+			}
+
+			qp.items = packageChannels?.map((pkg) => {
+				return {
+					label: `${pkg.package}`,
+					description: `(${pkg.version}) from ${pkg.channel}`,
+					detail: pkg.summary,
+				};
+			});
+		};
+		qp.onDidChangeValue(async (userInput) => {
+			searchAndUpdate(userInput);
+		});
+		const selectedPackages = await new Promise<string[]>((resolve) => {
+			qp.onDidAccept(() => {
+				resolve(qp.selectedItems.map((item) => item.label));
+				qp.dispose();
+			});
+		});
+		console.log(selectedPackages);
+		return selectedPackages;
+	}
+
 	/**
 	 * Initializes the Pixi service.
 	 * Prompts the user to choose a project type, platform, and channels.
@@ -73,7 +137,7 @@ export class PixiService implements IPixiService {
 	 *
 	 */
 	async addChannel(definedChannels?: string[]): Promise<string[]> {
-		let args: string[] = [PixiCommand.addChannel, "add"];
+		let args: string[] = [PixiCommand.addChannel];
 		await this.chooseChannels(definedChannels).then((channels) => {
 			args.push(...channels);
 		});
@@ -289,7 +353,7 @@ export class PixiService implements IPixiService {
 	 * @param options - The options for the quick pick menu.
 	 * @returns A promise that resolves to an array of selected item labels.
 	 */
-	private async showQuickPick(options: {
+	async showQuickPick(options: {
 		title: string;
 		placeholder: string;
 		items: vscode.QuickPickItem[];
@@ -393,5 +457,16 @@ export class PixiService implements IPixiService {
 	 */
 	public async getEnvironmentTasks(): Promise<any | undefined> {
 		return this.pixi.Tasks();
+	}
+
+	/**
+	 * Retrieves the features of the current environment.
+	 *
+	 * @returns A promise that resolves to the environment features.
+	 */
+	public async getEnvironmentFeatures(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.pixi.Features(manifestPath);
 	}
 }

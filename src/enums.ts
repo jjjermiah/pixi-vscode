@@ -36,5 +36,5 @@ export enum PixiCommand {
 	remove = "remove",
 	list = "list",
 
-	addChannel = "project channel"
+	addChannel = "project channel add",
 }

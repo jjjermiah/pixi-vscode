@@ -18,20 +18,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "pixi-vscode.helloWorld",
-        "title": "Pixi: Hello World"
-      },
-      {
         "command": "pixi-vscode.init",
         "title": "Pixi: Init"
       },
       {
-        "command": "pixi-vscode.clearCache",
-        "title": "Pixi: Clear Extension Cache"
+        "command": "pixi-vscode.addPackages",
+        "title": "Pixi: Add Packages"
       },
       {
-        "command": "pixi-vscode.addChannel",
+        "command": "pixi-vscode.addChannels",
         "title": "Pixi: Add Channels"
+      },
+      {
+        "command": "pixi-vscode.clearCache",
+        "title": "Pixi: Clear Extension Cache"
       }
     ],
     "menus": {
@@ -42,7 +42,12 @@
           "when": "explorerResourceIsFolder"
         },
         {
-          "command": "pixi-vscode.addChannel",
+          "command": "pixi-vscode.addPackages",
+          "group": "1_pixi",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "pixi-vscode.addChannels",
           "group": "1_pixi",
           "when": "explorerResourceIsFolder"
         }
