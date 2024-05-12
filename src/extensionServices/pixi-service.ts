@@ -28,7 +28,7 @@ interface IPixiService {
  * Represents the Pixi service.
  */
 export class PixiService implements IPixiService {
-	private pixi: Pixi;
+	public pixi: Pixi;
 	private PixiCache: any;
 	private prefixClient = new PrefixClient();
 

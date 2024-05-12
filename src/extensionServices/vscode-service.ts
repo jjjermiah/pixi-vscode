@@ -2,22 +2,52 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import { info, warn, error } from "../common/logging";
-import { PixiService } from "./pixi-service";
-import { Pixi } from "../environmentManagers/pixi";
 import { PixiCommand } from "../enums";
 const Cache = require("vscode-cache");
+import {
+	EnvironmentPath,
+	PythonExtension,
+	ResolvedEnvironment,
+} from "@vscode/python-extension";
 
 export class VSCodeExtensionService {
 	constructor() {}
 
-	public async setDefaultPythonInterpreter(pythonPath: string) {
-		await vscode.workspace
-			.getConfiguration()
-			.update(
-				"python.defaultInterpreterPath",
-				pythonPath,
-				vscode.ConfigurationTarget.Workspace
-			);
+	/**
+	 * Sets the default Python interpreter path for the workspace.
+	 * @param pythonPath The path to the Python interpreter.
+	 */
+	public async setPythonInterpreterPath(
+		pythonPath: string
+	): Promise<string | undefined> {
+		// Dont think this is necessary
+		// await vscode.workspace.getConfiguration().update(
+		// 	"python.defaultInterpreterPath",
+		// 	pythonPath,
+		// 	vscode.ConfigurationTarget.Workspace
+		// );
+
+		const pythonApi: PythonExtension = await PythonExtension.api();
+
+		const environmentPath: EnvironmentPath = {
+			id: "mynewEnv",
+			path: pythonPath,
+		};
+		const myenvironment: ResolvedEnvironment | undefined =
+			await pythonApi.environments.resolveEnvironment(environmentPath);
+		if (myenvironment === undefined) {
+			return undefined;
+		}
+		console.log(myenvironment);
+		pythonApi.environments.updateActiveEnvironmentPath(myenvironment);
+		await pythonApi.environments.refreshEnvironments();
+		const activeEnvironmentPath: EnvironmentPath | undefined =
+			pythonApi.environments.getActiveEnvironmentPath();
+		console.log(activeEnvironmentPath);
+		if (activeEnvironmentPath) {
+			return activeEnvironmentPath.path;
+		}
+		return undefined;
 	}
 
 	public async activeTextEditors(): Promise<vscode.TextEditor[] | undefined> {
@@ -99,7 +129,7 @@ export class VSCodeExtensionService {
 		);
 	}
 
-	// unsure where to put this function ... only used during init
+	// TODO: unsure where to put this function ... only used during init. Maybe in the pixi-extensionservice?
 	async promptForProjectName(): Promise<string | undefined> {
 		const inputBox = vscode.window.createInputBox();
 		inputBox.title = "Enter Project Name";

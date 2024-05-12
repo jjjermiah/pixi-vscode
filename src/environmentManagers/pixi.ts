@@ -48,7 +48,7 @@ export class Pixi {
 
 	/**
 	 * Get the user's default Pixi (aka rattler-build defined) platform
-	 * 
+	 *
 	 * @returns  the default platform
 	 */
 	public async PixiDefaultPlatform(): Promise<PixiPlatform | undefined> {
@@ -110,5 +110,20 @@ export class Pixi {
 				}))
 			)
 		);
+	}
+
+	/**
+	 * Returns the path to the Python interpreter used by the workspace.
+	 *
+	 *
+	 * @param `environments_info` env_info - The environments_info object
+	 * containing the prefix path to the Python interpreter.
+	 *
+	 * @returns The path to the Python interpreter.
+	 */
+	public async getPythonInterpreterPath(
+		env_info: environments_info
+	): Promise<string> {
+		return `${env_info.prefix}/bin/python`;
 	}
 }

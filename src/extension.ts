@@ -54,6 +54,16 @@ export function activate(context: vscode.ExtensionContext) {
 			cache.flush();
 		})
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"pixi-vscode.addPythonInterpreter",
+			async (uri: vscode.Uri) => {
+				await pxe.addPythonInterpreter(uri);
+			}
+		)
+	);
+
 }
 
 // This method is called when your extension is deactivated

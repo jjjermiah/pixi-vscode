@@ -155,6 +155,53 @@ export class PixiExtensionService {
 		this.vse.runPixiCommand(args);
 	}
 
+	async addPythonInterpreter(uri: vscode.Uri) {
+		if (await this.vse.isEmptyWorkspace()) {
+			notify.error("No workspace folders open");
+			return;
+		}
+		const pixiProject = await this.getPixiProjectDir(uri);
+		if (!pixiProject.projectDir) return; // if user cancels the prompt
+
+		const manifestPath = await this.findManifestFile(
+			pixiProject.projectDir.fsPath
+		);
+		const envs = await this.pixi_service.getEnvironmentInfo(manifestPath);
+		if (!envs) {
+			notify.error("No environments found");
+			return;
+		}
+
+		// TODO refactor this... it's a bit messy
+		const items: vscode.QuickPickItem[] = await Promise.all(
+			envs.map(async (env: any) => ({
+				label: env.name,
+				description:
+					await this.pixi_service.pixi.getPythonInterpreterPath(env),
+				detail: env.dependencies.join(", "),
+			}))
+		);
+
+		const selectedEnv = await this.pixi_service.showQuickPick({
+			title: "Select Environment",
+			items: items,
+			placeholder: "Select an environment",
+			canSelectMany: false,
+		});
+		if (!selectedEnv) return;
+		const selectedPythonPath = items.find(
+			(item) => item.label === selectedEnv[0]
+		);
+		if (!selectedPythonPath?.description) return;
+		console.log(`Selected Python Path: ${selectedPythonPath.label}`);
+
+		await this.vse
+			.setPythonInterpreterPath(selectedPythonPath.description)
+			.then((_) => {
+				notify.info("Python Interpreter set successfully");
+			});
+	}
+
 	/**
 	 * Get the Pixi project directory
 	 *
