@@ -201,12 +201,22 @@ export class PixiExtensionService {
 		if (!selectedPythonEnv) return;
 		console.log(`Selected Python Path: ${selectedPythonEnv.name}`);
 
-		await this.vse
-			.setPythonInterpreterPath(
-				await this.pixi_service.pixi.getPythonInterpreterPath(
-					selectedPythonEnv
-				)
-			)
+		const selectedPythonPath =
+			await this.pixi_service.pixi.getPythonInterpreterPath(
+				selectedPythonEnv
+			);
+
+		// check if the selected python path is valid and exists
+		if (!fs.existsSync(selectedPythonPath)) {
+			notify.error(
+				`Python interpreter path does not exist: ${selectedPythonPath}` +
+					`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+			);
+			return;
+		}
+
+		this.vse
+			.setPythonInterpreterPath(selectedPythonPath)
 			.then((env: ResolvedEnvironment | undefined) => {
 				if (!env) {
 					notify.error("Failed to set Python interpreter");
