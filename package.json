@@ -32,6 +32,10 @@
       {
         "command": "pixi-vscode.clearCache",
         "title": "Pixi: Clear Extension Cache"
+      },
+      {
+        "command": "pixi-vscode.addPythonInterpreter",
+        "title": "Pixi: Add Python Interpreter"
       }
     ],
     "menus": {
@@ -136,6 +140,7 @@
   "dependencies": {
     "@apollo/client": "^3.10.3",
     "@types/react": "^18.3.1",
+    "@vscode/python-extension": "^1.0.5",
     "graphql": "^16.8.1",
     "react": "^18.3.1",
     "vscode-cache": "^0.3.0"
