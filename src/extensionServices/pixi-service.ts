@@ -138,9 +138,7 @@ export class PixiService implements IPixiService {
 	 */
 	async addChannel(definedChannels?: string[]): Promise<string[]> {
 		let args: string[] = [PixiCommand.addChannel];
-		await this.chooseChannels(definedChannels).then((channels) => {
-			args.push(...channels);
-		});
+		args.push(...(await this.chooseChannels(definedChannels)));
 		return args;
 	}
 
@@ -179,16 +177,21 @@ export class PixiService implements IPixiService {
 	 * @returns A promise that resolves with an array of selected channel names.
 	 */
 	async chooseChannels(definedChannels?: string[]): Promise<string[]> {
-		const defaultChannels: string[] = vscode.workspace
+		// Query the online database for all channels
+		const allChannels = await this.prefixClient.getAllChannels();
+
+		// User defined configuration for default channels
+		const defaultChannels: string[] = await vscode.workspace
 			.getConfiguration("pixi-vscode")
 			.get<string[]>("defaultChannels", []);
 
-		const previouslySelectedChannels: string[] = this.PixiCache.get(
+		// cached last selected channels
+		const previouslySelectedChannels: string[] = await this.PixiCache.get(
 			"selectedChannels",
 			[]
 		).filter((channel: any) => !defaultChannels.includes(channel));
 
-		const allChannels = await this.prefixClient.getAllChannels();
+		// Filter out the default and previously selected channels
 		const filteredChannels = allChannels.filter((channel: any) => {
 			return (
 				!defaultChannels.includes(channel.name) &&

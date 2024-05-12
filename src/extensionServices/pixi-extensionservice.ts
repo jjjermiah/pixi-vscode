@@ -25,91 +25,71 @@ export class PixiExtensionService {
 	 * @returns 		- void
 	 */
 	async init(uri: vscode.Uri) {
-		// The folder to initialize the project in
-
-		let pixi_project_dir: vscode.Uri;
-
 		// if we are opening a new folder in the workspace
-
-		let updateWorkspaceFolder = false;
-
-		/**
-		 * LOGIC:
-		 * if : uri is not null, then right-clicked on a folder in explorer
-		 * else if : no workspace folders open, then choose a folder and prompt for
-		 * 						project name
-		 * else : if workspace folders open, then choose one
-		 */
-		if (uri) {
-			pixi_project_dir = uri!;
-		} else if (await this.vse.isEmptyWorkspace()) {
-			const parent_dir = (await this.vse.openFolder())![0];
-			const projectName = await this.vse.promptForProjectName();
-			if (!projectName) return;
-			pixi_project_dir = vscode.Uri.joinPath(parent_dir, projectName);
-
-			// true so that after pixi init, open the chosen folder in the current window
-			updateWorkspaceFolder = true;
-		} else {
-			pixi_project_dir = (await this.vse.chooseWorkspaceFolder())!.uri;
-		}
-		if (!pixi_project_dir) {
-			notify.error("PXS init: Failed to get project directory");
-			return;
-		}
+		// let updateWorkspaceFolder = false;
+		let pixiProject: {
+			projectDir: vscode.Uri;
+			updateWorkspaceFolder: boolean;
+		} = await this.getPixiProjectDir(uri, true);
+		if (!pixiProject.projectDir) return; // if user cancels the prompt
 
 		let args: string[] = await this.pixi_service.init();
-		if (!args) {
-			notify.error("PXS init: Failed to get init args");
-			return;
-		}
-		args.push(pixi_project_dir.fsPath);
+		if (!args) return; // if user cancels the prompt
 
 		// create a directory
-		fs.mkdir(pixi_project_dir.fsPath, { recursive: true }, (err) => {
-			if (err) {
-				notify.error("Failed to create directory: " + err);
-				return;
-			}
-		});
-		notify.info("Created project directory: " + pixi_project_dir.fsPath);
+		if (pixiProject.updateWorkspaceFolder) {
+			fs.mkdir(
+				pixiProject.projectDir.fsPath,
+				{ recursive: true },
+				(err) => {
+					if (err) {
+						notify.error("Failed to create directory: " + err);
+						return;
+					}
+				}
+			);
+			notify.info(
+				"Created project directory: " + pixiProject.projectDir.fsPath
+			);
 
-		if (updateWorkspaceFolder) {
-			this.vse.openFolderInCurrentWindow(pixi_project_dir.fsPath);
+			this.vse.openFolderInCurrentWindow(pixiProject.projectDir.fsPath);
 		}
+		// add the directory to the args
+		args.push(pixiProject.projectDir.fsPath);
 
 		if (await this.vse.runPixiCommand(args)) {
-			notify.info("Init: Pixi project initialized successfully");
-		}
-
-		const manifestPath = await this.findManifestFile(
-			pixi_project_dir.fsPath
-		);
-		if (manifestPath === "") {
-			notify.error("Init: something went wrong");
+			notify.info("Pixi project initialized successfully");
+			// Test if the init worked by looking for the manifest file
+			const manifestPath = await this.findManifestFile(
+				pixiProject.projectDir.fsPath
+			);
+			if (manifestPath === "") {
+				notify.error("Init: something went wrong");
+			}
 		}
 	}
 
 	async addChannels(uri: vscode.Uri) {
-		let pixi_project_dir: vscode.Uri;
-
-		if (uri) {
-			pixi_project_dir = uri;
-		} else if (await this.vse.isEmptyWorkspace()) {
+		if (await this.vse.isEmptyWorkspace()) {
 			notify.error("No workspace folders open");
 			return;
-		} else {
-			pixi_project_dir = (await this.vse.chooseWorkspaceFolder())!.uri;
 		}
+		let pixiProject: {
+			projectDir: vscode.Uri;
+			updateWorkspaceFolder: boolean;
+		} = await this.getPixiProjectDir(uri);
+		if (!pixiProject.projectDir) return; // if user cancels the prompt
+
 		const manifestPath = await this.findManifestFile(
-			pixi_project_dir.fsPath
+			pixiProject.projectDir.fsPath
 		);
 
 		const args: string[] = await this.pixi_service
 			.getChannels(manifestPath)
-			.then((channels) => {
-				return this.pixi_service.addChannel(channels);
+			.then((existing_channels) => {
+				return this.pixi_service.addChannel(existing_channels);
 			});
+
 		args.push(`--manifest-path ${manifestPath}`);
 		console.log("pixi " + args.join(" "));
 		this.vse.runPixiCommand(args);
@@ -157,6 +137,61 @@ export class PixiExtensionService {
 
 		console.log("pixi " + args.join(" "));
 		this.vse.runPixiCommand(args);
+	}
+
+	/**
+	 * Get the Pixi project directory
+	 *
+	 * @param uri - the uri of the folder to initialize the project in
+	 * @param updateWorkspaceFolder - boolean to update the workspace folder
+	 * @returns - the project directory and a boolean to update the workspace folder
+	 *
+	 * @description
+	 *	LOGIC: Determine the project directory based on the uri and workspace folders
+	 *
+	 * 	if : uri is not null, then user must've right-clicked on a folder in explorer
+	 * 	else if : no workspace folders open, then pick a system folder and prompt for
+	 * 						project name
+	 * 	else : if workspace folders open, then choose one of them
+	 */
+	private async getPixiProjectDir(
+		uri: vscode.Uri,
+		updateWorkspaceFolder?: boolean
+	): Promise<{
+		projectDir: vscode.Uri;
+		updateWorkspaceFolder: boolean;
+	}> {
+		if (uri) {
+			return { projectDir: uri, updateWorkspaceFolder: false };
+		} else if (await this.vse.isEmptyWorkspace()) {
+			// if theres no updateWorkspaceFolder variable, then error out and return
+			if (updateWorkspaceFolder === undefined) {
+				notify.error("No workspace folders open");
+				return {
+					projectDir: vscode.Uri.parse(""),
+					updateWorkspaceFolder: false,
+				};
+			}
+
+			const parent_dir = (await this.vse.openFolder())![0];
+			const projectName = await this.vse.promptForProjectName();
+			if (!projectName)
+				return {
+					projectDir: vscode.Uri.parse(""),
+					updateWorkspaceFolder: false,
+				};
+
+			return {
+				projectDir: vscode.Uri.joinPath(parent_dir, projectName),
+				// true so that after pixi init, open the chosen folder in the current window
+				updateWorkspaceFolder: true,
+			};
+		} else {
+			return {
+				projectDir: (await this.vse.chooseWorkspaceFolder())!.uri,
+				updateWorkspaceFolder: false,
+			};
+		}
 	}
 
 	async findManifestFile(pixi_project_dir: string) {
