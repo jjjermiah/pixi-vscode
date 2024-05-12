@@ -206,29 +206,24 @@ export class PixiService implements IPixiService {
 		});
 
 		let items: vscode.QuickPickItem[] = await this.prepareItems({
-			"Default Channels": defaultChannels.map((platform: any) => {
-				return {
-					label: platform,
-					description: "(Added in settings)",
-				};
-			}),
+			"Default Channels": defaultChannels.map((platform: any) => ({
+				label: platform,
+				description: "(Added in settings)",
+			})),
 			"Previously Selected Channels": previouslySelectedChannels.map(
-				(platform: any) => {
-					return {
-						label: platform,
-						description: "",
-					};
-				}
+				(platform: any) => ({
+					label: platform,
+					description: "",
+				})
 			),
-			"All Channels": filteredChannels.map((channel: any) => {
-				return {
-					label: channel.name,
-					description: channel.description,
-				};
-			}),
+			"All Channels": filteredChannels.map((channel: any) => ({
+				label: channel.name,
+				description: channel.description,
+			})),
 		});
 		// remove all the channels in definedChannels from the items
 		let selectedItems: vscode.QuickPickItem[] = [];
+
 		if (definedChannels) {
 			items = items.filter(
 				(item) => !definedChannels.includes(item.label)
@@ -271,7 +266,7 @@ export class PixiService implements IPixiService {
 
 	/**
 	 * Asks the user to choose additional platforms and returns the selected platforms.
-	 *
+	 * At the moment only used during Pixi::init.
 	 * @returns A promise that resolves with an array of selected platform names.
 	 */
 	async choosePlatform(): Promise<string[]> {
@@ -301,25 +296,20 @@ export class PixiService implements IPixiService {
 		);
 
 		const items = await this.prepareItems({
-			"Default Platforms": defaultPlatforms.map((platform: any) => {
-				return {
-					label: platform,
-					description: "(Added in settings)",
-				};
-			}),
+			"Default Platforms": defaultPlatforms.map((platform: any) => ({
+				label: platform,
+				description: "(Added in settings)",
+			})),
 			"Previously Selected Platforms": previouslySelectedPlatforms.map(
-				(platform: any) => {
-					return {
-						label: platform,
-					};
-				}
-			),
-			"Other Platforms": otherPlatforms.map((platform: any) => {
-				return {
+				(platform: any) => ({
 					label: platform,
-				};
-			}),
+				})
+			),
+			"Other Platforms": otherPlatforms.map((platform: any) => ({
+				label: platform,
+			})),
 		});
+
 		const selectedPlatforms = await this.showQuickPick({
 			title: `Select Platform in addition to current platform: ${userPlatform}`,
 			placeholder: "Select Platform",

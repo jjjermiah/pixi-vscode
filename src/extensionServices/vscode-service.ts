@@ -67,11 +67,9 @@ export class VSCodeExtensionService {
 	}
 
 	public async runPixiCommand(args: string[]): Promise<boolean | undefined> {
-		// add args to "Pixi " command
 		try {
-			const command = PixiCommand.tool + " " + args.join(" ");
+			const command: string = PixiCommand.tool + " " + args.join(" ");
 			console.log("Running Pixi command: " + command);
-			// return true if successful
 			return await this.openTerminalAndRunCommand(command);
 		} catch (e) {
 			error("Error running Pixi command: " + e);
