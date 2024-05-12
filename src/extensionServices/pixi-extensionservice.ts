@@ -30,12 +30,15 @@ export class PixiExtensionService {
 		let pixiProject: {
 			projectDir: vscode.Uri;
 			updateWorkspaceFolder: boolean;
-		} = await this.getPixiProjectDir(uri, true);
+		} = await this.getPixiProjectDir(uri);
 		if (!pixiProject.projectDir) return; // if user cancels the prompt
 
 		let args: string[] = await this.pixi_service.init();
 		if (!args) return; // if user cancels the prompt
 
+		// TODO convert this to a function
+		// Only when initializing a new project, we need to update the workspace
+		// if the user chooses to open a new folder in the current window
 		if (pixiProject.updateWorkspaceFolder) {
 			try {
 				// create a directory
@@ -167,44 +170,36 @@ export class PixiExtensionService {
 	 * 						project name
 	 * 	else : if workspace folders open, then choose one of them
 	 */
-	private async getPixiProjectDir(
-		uri: vscode.Uri,
-		updateWorkspaceFolder?: boolean
-	): Promise<{
+	private async getPixiProjectDir(uri: vscode.Uri): Promise<{
 		projectDir: vscode.Uri;
 		updateWorkspaceFolder: boolean;
 	}> {
 		if (uri) {
 			return { projectDir: uri, updateWorkspaceFolder: false };
-		} else if (await this.vse.isEmptyWorkspace()) {
-			// if theres no updateWorkspaceFolder variable, then error out and return
-			if (updateWorkspaceFolder === undefined) {
-				notify.error("No workspace folders open");
+		}
+
+		if (await this.vse.isEmptyWorkspace()) {
+			// This should really only happen during a Pixi::init command.
+			const parentDir = (await this.vse.openFolder())![0];
+			const projectName = await this.vse.promptForProjectName();
+			if (!projectName) {
 				return {
 					projectDir: vscode.Uri.parse(""),
 					updateWorkspaceFolder: false,
 				};
 			}
 
-			const parent_dir = (await this.vse.openFolder())![0];
-			const projectName = await this.vse.promptForProjectName();
-			if (!projectName)
-				return {
-					projectDir: vscode.Uri.parse(""),
-					updateWorkspaceFolder: false,
-				};
-
 			return {
-				projectDir: vscode.Uri.joinPath(parent_dir, projectName),
+				projectDir: vscode.Uri.joinPath(parentDir, projectName),
 				// true so that after pixi init, open the chosen folder in the current window
 				updateWorkspaceFolder: true,
 			};
-		} else {
-			return {
-				projectDir: (await this.vse.chooseWorkspaceFolder())!.uri,
-				updateWorkspaceFolder: false,
-			};
 		}
+
+		return {
+			projectDir: (await this.vse.chooseWorkspaceFolder())!.uri,
+			updateWorkspaceFolder: false,
+		};
 	}
 
 	async findManifestFile(pixi_project_dir: string) {
