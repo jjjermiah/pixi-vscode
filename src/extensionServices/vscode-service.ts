@@ -50,6 +50,7 @@ export class VSCodeExtensionService {
 	// ask user to choose a folder to open
 	public async openFolder(): Promise<vscode.Uri[] | undefined> {
 		return await vscode.window.showOpenDialog({
+			openLabel: "Initialize New Pixi Project in: ",
 			canSelectFiles: false,
 			canSelectFolders: true,
 			canSelectMany: false,
@@ -65,10 +66,18 @@ export class VSCodeExtensionService {
 		);
 	}
 
-	public async runPixiCommand(args: string[]): Promise<void> {
+	public async runPixiCommand(args: string[]): Promise<boolean | undefined> {
 		// add args to "Pixi " command
-		const command = PixiCommand.tool + " " + args.join(" ");
-		await this.openTerminalAndRunCommand(command);
+		try {
+			const command = PixiCommand.tool + " " + args.join(" ");
+			console.log("Running Pixi command: " + command);
+			// return true if successful
+			return await this.openTerminalAndRunCommand(command)
+				.then(() => true)
+				.catch(() => false);
+		} catch (e) {
+			error("Error running Pixi command: " + e);
+		}
 	}
 
 	public async openTerminalAndRunCommand(command: string): Promise<void> {
@@ -80,7 +89,7 @@ export class VSCodeExtensionService {
 		await vscode.commands.executeCommand("workbench.action.terminal.clear");
 		terminal.sendText(command);
 		// Return true if command was successful
-		
+
 		// terminal.dispose();
 	}
 

@@ -33,7 +33,7 @@ export class PixiService implements IPixiService {
 	 */
 	constructor(cache: typeof Cache) {
 		this.pixi = new Pixi(
-			"pixi",
+			PixiCommand.tool,
 			vscode.workspace.workspaceFolders?.[0].uri.fsPath || process.cwd()
 		);
 		this.PixiCache = cache;

@@ -95,8 +95,8 @@ export class Pixi {
 			.then((features) => Array.from(new Set(features)));
 	}
 
-	public async Tasks(): Promise<PixiTask[] | undefined> {
-		return this.EnvironmentInfo().then((info) =>
+	public async Tasks(manifestPath?: string): Promise<PixiTask[] | undefined> {
+		return this.EnvironmentInfo(manifestPath).then((info) =>
 			// for each task within an environment, create a PixiTask
 			info?.flatMap((env) =>
 				env.tasks.map((task) => ({
@@ -107,47 +107,3 @@ export class Pixi {
 		);
 	}
 }
-
-// pixi.getPixiDefaultPlatform().then((platform) => {
-// 	if (platform) {
-// 		console.log(`Pixi default platform: ${platform}`);
-// 	} else {
-// 		error("No Pixi default platform found");
-// 	}
-// });
-
-// pixi.getEnvironmentInfo().then((envs) => {
-// 	if (envs) {
-// 		console.log("Pixi environment info:");
-// 		console.log(envs);
-// 	} else {
-// 		error("No Pixi environment info found");
-// 	}
-// });
-
-// pixi.getEnvironmentNames().then((names) => {
-// 	if (names) {
-// 		console.log("Pixi environment names:");
-// 		console.log(names);
-// 	} else {
-// 		error("No Pixi environment names found");
-// 	}
-// });
-
-// pixi.getEnvironmentPrefixes().then((prefixes) => {
-// 	if (prefixes) {
-// 		console.log("Pixi environment prefixes:");
-// 		console.log(prefixes);
-// 	} else {
-// 		error("No Pixi environment prefixes found");
-// 	}
-// });
-
-// pixi.getPixiTasks().then((tasks) => {
-// 	if (tasks) {
-// 		console.log("Pixi tasks:");
-// 		console.log(tasks);
-// 	} else {
-// 		error("No Pixi tasks found");
-// 	}
-// });

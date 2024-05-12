@@ -94,7 +94,13 @@
           ]
         }
       }
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "workbench.explorer.emptyView",
+        "contents": "You can initialize a new Pixi Project with\n[New Pixi Project](command:pixi-vscode.init)\nChoose the folder to create a new Pixi Project in."
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",

@@ -78,7 +78,9 @@ export class PixiExtensionService {
 			this.vse.openFolderInCurrentWindow(pixi_project_dir.fsPath);
 		}
 
-		this.vse.openTerminalAndRunCommand("pixi " + args.join(" "));
+		if (await this.vse.runPixiCommand(args)) {
+			notify.info("Init: Pixi project initialized successfully");
+		}
 
 		const manifestPath = await this.findManifestFile(
 			pixi_project_dir.fsPath
@@ -154,6 +156,7 @@ export class PixiExtensionService {
 		args.push(`--manifest-path ${manifestPath}`);
 
 		console.log("pixi " + args.join(" "));
+		this.vse.runPixiCommand(args);
 	}
 
 	async findManifestFile(pixi_project_dir: string) {
