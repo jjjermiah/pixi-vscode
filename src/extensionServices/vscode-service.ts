@@ -19,7 +19,8 @@ export class VSCodeExtensionService {
 	 */
 	public async setPythonInterpreterPath(
 		pythonPath: string
-	): Promise<string | undefined> {
+	): Promise<ResolvedEnvironment | undefined> {
+		// TODO think about using this configuration target
 		// Dont think this is necessary
 		// await vscode.workspace.getConfiguration().update(
 		// 	"python.defaultInterpreterPath",
@@ -35,17 +36,19 @@ export class VSCodeExtensionService {
 		};
 		const myenvironment: ResolvedEnvironment | undefined =
 			await pythonApi.environments.resolveEnvironment(environmentPath);
+
 		if (myenvironment === undefined) {
 			return undefined;
 		}
-		console.log(myenvironment);
+
 		pythonApi.environments.updateActiveEnvironmentPath(myenvironment);
 		await pythonApi.environments.refreshEnvironments();
+
 		const activeEnvironmentPath: EnvironmentPath | undefined =
 			pythonApi.environments.getActiveEnvironmentPath();
-		console.log(activeEnvironmentPath);
+
 		if (activeEnvironmentPath) {
-			return activeEnvironmentPath.path;
+			return myenvironment;
 		}
 		return undefined;
 	}

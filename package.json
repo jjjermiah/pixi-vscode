@@ -5,6 +5,11 @@
   "description": "Pixi support for Visual Studio Code",
   "version": "0.0.1",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jjjermiah/pixi-vscode"
+  },
+  "icon": "assets/images/prefix_logo_temp.png",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -34,8 +39,8 @@
         "title": "Pixi: Clear Extension Cache"
       },
       {
-        "command": "pixi-vscode.addPythonInterpreter",
-        "title": "Pixi: Add Python Interpreter"
+        "command": "pixi-vscode.setPythonInterpreter",
+        "title": "Pixi: Set Python Interpreter"
       }
     ],
     "menus": {
@@ -71,7 +76,7 @@
         },
         "pixi-vscode.prefixAPIKey": {
           "type": "string",
-          "default": "pfx-JBqNSrT9NoFbvlYfhMWfwpDGkv4K84RxIDqX",
+          "default": "",
           "description": "The prefix API key"
         },
         "pixi-vscode.defaultChannels": {

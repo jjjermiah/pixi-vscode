@@ -5,6 +5,13 @@ const Cache = require("vscode-cache");
 import { PrefixClient } from "../prefixAPI/prefix-client";
 import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
 
+import {
+	PixiProjectInfo,
+	PixiInfo,
+	PixiTask,
+	environments_info,
+} from "../types";
+
 import { Pixi } from "../environmentManagers/pixi";
 interface IPixiService {
 	init(): Promise<string[]>;
@@ -458,7 +465,7 @@ export class PixiService implements IPixiService {
 	 */
 	public async getEnvironmentInfo(
 		manifestPath?: string
-	): Promise<any | undefined> {
+	): Promise<environments_info[] | undefined> {
 		return this.pixi.EnvironmentInfo(manifestPath);
 	}
 	/**

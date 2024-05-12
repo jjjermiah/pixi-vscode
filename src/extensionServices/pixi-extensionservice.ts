@@ -4,6 +4,11 @@ import * as fs from "fs";
 import * as notify from "../common/logging";
 import { PixiService } from "./pixi-service";
 const Cache = require("vscode-cache");
+import {
+	EnvironmentPath,
+	PythonExtension,
+	ResolvedEnvironment,
+} from "@vscode/python-extension";
 
 import { VSCodeExtensionService } from "./vscode-service";
 
@@ -155,7 +160,7 @@ export class PixiExtensionService {
 		this.vse.runPixiCommand(args);
 	}
 
-	async addPythonInterpreter(uri: vscode.Uri) {
+	async setPythonInterpreter(uri: vscode.Uri) {
 		if (await this.vse.isEmptyWorkspace()) {
 			notify.error("No workspace folders open");
 			return;
@@ -189,16 +194,25 @@ export class PixiExtensionService {
 			canSelectMany: false,
 		});
 		if (!selectedEnv) return;
-		const selectedPythonPath = items.find(
-			(item) => item.label === selectedEnv[0]
+
+		const selectedPythonEnv = envs.find(
+			(env: any) => env.name === selectedEnv[0]
 		);
-		if (!selectedPythonPath?.description) return;
-		console.log(`Selected Python Path: ${selectedPythonPath.label}`);
+		if (!selectedPythonEnv) return;
+		console.log(`Selected Python Path: ${selectedPythonEnv.name}`);
 
 		await this.vse
-			.setPythonInterpreterPath(selectedPythonPath.description)
-			.then((_) => {
-				notify.info("Python Interpreter set successfully");
+			.setPythonInterpreterPath(
+				await this.pixi_service.pixi.getPythonInterpreterPath(
+					selectedPythonEnv
+				)
+			)
+			.then((env: ResolvedEnvironment | undefined) => {
+				if (!env) {
+					notify.error("Failed to set Python interpreter");
+					return;
+				}
+				notify.info(`Python interpreter set to ${env.path}`);
 			});
 	}
 

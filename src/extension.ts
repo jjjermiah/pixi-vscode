@@ -57,9 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"pixi-vscode.addPythonInterpreter",
+			"pixi-vscode.setPythonInterpreter",
 			async (uri: vscode.Uri) => {
-				await pxe.addPythonInterpreter(uri);
+				await pxe.setPythonInterpreter(uri);
 			}
 		)
 	);
