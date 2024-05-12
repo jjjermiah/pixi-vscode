@@ -72,15 +72,13 @@ export class VSCodeExtensionService {
 			const command = PixiCommand.tool + " " + args.join(" ");
 			console.log("Running Pixi command: " + command);
 			// return true if successful
-			return await this.openTerminalAndRunCommand(command)
-				.then(() => true)
-				.catch(() => false);
+			return await this.openTerminalAndRunCommand(command);
 		} catch (e) {
 			error("Error running Pixi command: " + e);
 		}
 	}
 
-	public async openTerminalAndRunCommand(command: string): Promise<void> {
+	public async openTerminalAndRunCommand(command: string): Promise<boolean> {
 		const terminal = await this.getActiveTerminal();
 		//TODO add config option to show terminal
 		//this.terminal.show(this.config.preserveEditorFocus);
@@ -89,7 +87,7 @@ export class VSCodeExtensionService {
 		await vscode.commands.executeCommand("workbench.action.terminal.clear");
 		terminal.sendText(command);
 		// Return true if command was successful
-
+		return true;
 		// terminal.dispose();
 	}
 

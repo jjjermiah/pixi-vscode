@@ -36,103 +36,116 @@ export class PixiExtensionService {
 		let args: string[] = await this.pixi_service.init();
 		if (!args) return; // if user cancels the prompt
 
-		// create a directory
 		if (pixiProject.updateWorkspaceFolder) {
-			fs.mkdir(
-				pixiProject.projectDir.fsPath,
-				{ recursive: true },
-				(err) => {
-					if (err) {
-						notify.error("Failed to create directory: " + err);
-						return;
-					}
-				}
-			);
-			notify.info(
-				"Created project directory: " + pixiProject.projectDir.fsPath
-			);
-
-			this.vse.openFolderInCurrentWindow(pixiProject.projectDir.fsPath);
+			try {
+				// create a directory
+				await fs.promises.mkdir(pixiProject.projectDir.fsPath, {
+					recursive: true,
+				});
+				notify.info(
+					"Created project directory: " +
+						pixiProject.projectDir.fsPath
+				);
+				this.vse.openFolderInCurrentWindow(
+					pixiProject.projectDir.fsPath
+				);
+			} catch (err) {
+				notify.error("Failed to create directory: " + err);
+				return;
+			}
 		}
 		// add the directory to the args
 		args.push(pixiProject.projectDir.fsPath);
+		const commandResults = await this.vse.runPixiCommand(args);
 
-		if (await this.vse.runPixiCommand(args)) {
+		// TODO clean this section up. This is a workaround to check if the init worked
+		if (commandResults) {
+			// sleep for 2 seconds to allow the manifest file to be created
+
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+
 			notify.info("Pixi project initialized successfully");
 			// Test if the init worked by looking for the manifest file
 			const manifestPath = await this.findManifestFile(
 				pixiProject.projectDir.fsPath
 			);
-			if (manifestPath === "") {
+			if (!manifestPath) {
 				notify.error("Init: something went wrong");
+				return;
 			}
 		}
 	}
 
+	/**
+	 * Adds channels to the workspace based on the provided URI.
+	 * If the workspace is empty, an error notification is shown.
+	 * The method retrieves the Pixi project directory from the URI and finds the manifest file.
+	 * It then gets the existing channels from the manifest file and prompts the user to add a new channel.
+	 * Finally, it runs the Pixi command with the updated arguments.
+	 *
+	 * @param uri - The URI of the file or folder in the workspace.
+	 * @returns void
+	 */
 	async addChannels(uri: vscode.Uri) {
 		if (await this.vse.isEmptyWorkspace()) {
 			notify.error("No workspace folders open");
 			return;
 		}
-		let pixiProject: {
-			projectDir: vscode.Uri;
-			updateWorkspaceFolder: boolean;
-		} = await this.getPixiProjectDir(uri);
+
+		const pixiProject = await this.getPixiProjectDir(uri);
 		if (!pixiProject.projectDir) return; // if user cancels the prompt
 
 		const manifestPath = await this.findManifestFile(
 			pixiProject.projectDir.fsPath
 		);
 
-		const args: string[] = await this.pixi_service
-			.getChannels(manifestPath)
-			.then((existing_channels) => {
-				return this.pixi_service.addChannel(existing_channels);
-			});
+		const existingChannels = await this.pixi_service.getChannels(
+			manifestPath
+		);
+		const args = await this.pixi_service.addChannel(existingChannels);
 
 		args.push(`--manifest-path ${manifestPath}`);
 		console.log("pixi " + args.join(" "));
 		this.vse.runPixiCommand(args);
 	}
 
+	/**
+	 * Adds packages to the Pixi project located at the specified URI.
+	 * If no URI is provided, it prompts the user to choose a workspace folder.
+	 *
+	 * @param uri - The URI of the Pixi project directory.
+	 */
 	async addPackages(uri: vscode.Uri) {
-		let pixi_project_dir: vscode.Uri;
-		if (uri) {
-			pixi_project_dir = uri;
-		} else if (await this.vse.isEmptyWorkspace()) {
-			notify.error("No workspace folders open");
-			return;
-		} else {
-			pixi_project_dir = (await this.vse.chooseWorkspaceFolder())!.uri;
-		}
+		const pixi_project_dir =
+			uri || (await this.vse.chooseWorkspaceFolder())!.uri;
 
 		const manifestPath = await this.findManifestFile(
 			pixi_project_dir.fsPath
 		);
 		const args = await this.pixi_service.addPackages();
-		// if user wants to add to a specific environment
-		const feature = await this.pixi_service
-			.getEnvironmentFeatures(manifestPath)
-			.then((features) => {
-				if (!features) console.log("No features found");
-				return this.pixi_service.showQuickPick({
-					title: "Feature to add packages to",
-					items: features!.map((feature) => {
-						return { label: feature, description: "" };
-					}),
-					placeholder: "Select a feature",
-					canSelectMany: false,
-					selectedItems: [
-						{
-							label: "default",
-							description: "",
-						},
-					],
-				});
-			});
-		if (feature) {
+
+		const features = await this.pixi_service.getEnvironmentFeatures(
+			manifestPath
+		);
+		if (!features) {
+			console.log("No features found");
+		}
+
+		const chosenFeatures = await this.pixi_service.showQuickPick({
+			title: "Feature to add packages to",
+			items: features!.map((feature) => ({
+				label: feature,
+				description: "",
+			})),
+			placeholder: "Select a feature",
+			canSelectMany: false,
+			selectedItems: [{ label: "default", description: "" }],
+		});
+		const feature = chosenFeatures ? chosenFeatures[0] : "default";
+		if (feature !== "default") {
 			args.push(`--feature ${feature}`);
 		}
+
 		args.push(`--manifest-path ${manifestPath}`);
 
 		console.log("pixi " + args.join(" "));

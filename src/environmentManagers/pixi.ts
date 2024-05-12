@@ -46,6 +46,11 @@ export class Pixi {
 		return info;
 	}
 
+	/**
+	 * Get the user's default Pixi (aka rattler-build defined) platform
+	 * 
+	 * @returns  the default platform
+	 */
 	public async PixiDefaultPlatform(): Promise<PixiPlatform | undefined> {
 		return this.getPixiInfo().then((info) => info?.platform);
 	}

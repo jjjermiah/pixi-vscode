@@ -6,7 +6,6 @@ import { PrefixClient } from "../prefixAPI/prefix-client";
 import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
 
 import { Pixi } from "../environmentManagers/pixi";
-
 interface IPixiService {
 	init(): Promise<string[]>;
 	chooseProjectType(): Promise<string>;
@@ -16,6 +15,13 @@ interface IPixiService {
 	getEnvironmentPrefixes(): Promise<string[] | undefined>;
 	getEnvironmentInfo(): Promise<any | undefined>;
 	getEnvironmentTasks(): Promise<any | undefined>;
+	addPackages(definedPackages?: string[]): Promise<string[]>;
+	addChannel(definedChannels?: string[]): Promise<string[]>;
+	findProjectFile(dir: string): Promise<string>;
+	getChannels(manifestPath?: string): Promise<string[] | undefined>;
+	getEnvironmentFeatures(
+		manifestPath?: string
+	): Promise<string[] | undefined>;
 }
 
 /**
@@ -402,24 +408,28 @@ export class PixiService implements IPixiService {
 			console.log("findProjectFile: dir is undefined");
 			return "";
 		}
-		const files = await vscode.workspace.fs.readDirectory(
-			vscode.Uri.file(dir)
-		);
-		// pixi.toml or pyproject.toml only
-		const projectFile = files.find(
-			(file) =>
-				file[1] === vscode.FileType.File &&
-				(file[0] === "pixi.toml" || file[0] === "pyproject.toml")
+
+		const projectFile = await vscode.workspace.findFiles(
+			new vscode.RelativePattern(dir, "{pixi,pyproject}.toml")
 		);
 
 		if (projectFile) {
-			return vscode.Uri.file(`${dir}/${projectFile[0]}`).fsPath;
+			console.log("findProjectFile: Project file found");
+			return projectFile[0].fsPath;
 		}
 
 		console.log("findProjectFile: No project file found");
 		return "";
 	}
 
+	// TODO: Get rid of these duplicate functions and just use the ones in the Pixi class
+
+	/**
+	 * Retrieves the channels from the Pixi service.
+	 *
+	 * @param manifestPath - Optional path to the manifest file.
+	 * @returns A promise that resolves to an array of strings representing the channels, or undefined if an error occurs.
+	 */
 	public async getChannels(
 		manifestPath?: string
 	): Promise<string[] | undefined> {
@@ -429,42 +439,54 @@ export class PixiService implements IPixiService {
 	/**
 	 * Retrieves the names of the available environments.
 	 *
+	 * @param manifestPath - The path to the manifest file.
 	 * @returns A promise that resolves to an array of environment names.
 	 */
-	public async getEnvironmentNames(): Promise<string[] | undefined> {
-		return this.pixi.EnvironmentNames();
+	public async getEnvironmentNames(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.pixi.EnvironmentNames(manifestPath);
 	}
 
 	/**
 	 * Retrieves the prefixes of the available environments.
 	 *
+	 * @param manifestPath - The path to the manifest file.
 	 * @returns A promise that resolves to an array of environment prefixes.
 	 */
-	public async getEnvironmentPrefixes(): Promise<string[] | undefined> {
-		return this.pixi.EnvironmentPrefixes();
+	public async getEnvironmentPrefixes(
+		manifestPath?: string
+	): Promise<string[] | undefined> {
+		return this.pixi.EnvironmentPrefixes(manifestPath);
 	}
 
 	/**
 	 * Retrieves information about the current environment.
 	 *
+	 * @param manifestPath - The path to the manifest file.
 	 * @returns A promise that resolves to the environment information.
 	 */
-	public async getEnvironmentInfo(): Promise<any | undefined> {
-		return this.pixi.EnvironmentInfo();
+	public async getEnvironmentInfo(
+		manifestPath?: string
+	): Promise<any | undefined> {
+		return this.pixi.EnvironmentInfo(manifestPath);
 	}
-
 	/**
 	 * Retrieves the tasks of the current environment.
 	 *
+	 * @param manifestPath - The path to the manifest file.
 	 * @returns A promise that resolves to the environment tasks.
 	 */
-	public async getEnvironmentTasks(): Promise<any | undefined> {
-		return this.pixi.Tasks();
+	public async getEnvironmentTasks(
+		manifestPath?: string
+	): Promise<any | undefined> {
+		return this.pixi.Tasks(manifestPath);
 	}
 
 	/**
 	 * Retrieves the features of the current environment.
 	 *
+	 * @param manifestPath - The path to the manifest file.
 	 * @returns A promise that resolves to the environment features.
 	 */
 	public async getEnvironmentFeatures(
