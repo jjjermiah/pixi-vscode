@@ -46,6 +46,7 @@ export class PixiExtensionService {
 		// if the user chooses to open a new folder in the current window
 		if (pixiProject.updateWorkspaceFolder) {
 			try {
+				// TODO I actually dont think we need to create a directory, pixi init should do that
 				// create a directory
 				await fs.promises.mkdir(pixiProject.projectDir.fsPath, {
 					recursive: true,

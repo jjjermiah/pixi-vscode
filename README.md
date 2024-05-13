@@ -42,12 +42,12 @@ The prefix team is working on a [contribution to the official Python VSCode exte
 
 | Command Palette Command | Context Menu (right-click on folder)| Pixi Command | Description |
 | --- | --- | --- | --- |
-| `Pixi: Init` | `Pixi: Init` | `pixi init` | Initialize a new Pixi project through an interactive menu to choose project type, additional channels, and platforms. |
-| `Pixi: Add Channel` | `Pixi: Add Channel` | `pixi add channel` | Add channels to an existing Pixi project through an interactive menu to choose from available public channels. |
-| `Pixi: Add Package` | `Pixi: Add Package` | `pixi add package` | Add packages to an existing Pixi project through an interactive menu to choose from available packages. |
-| `Pixi: Set Python Interpreter` | `unavailable` | `pixi set python` | Choose a environment from Pixi's environment list and set the Python interpreter for the workspace.
-| `Pixi: Activate Environment in new Terminal` | `unavailable` | `pixi shell` | Choose an environment from the pixi project and activate it in a new terminal. |
-| `Pixi: Clear Extension Cache` | `unavailable` | `pixi clear cache` | This extension stores previously selected channels and platforms in the extension's cache. This command clears the cache. |
+| `Pixi: Init` | `Pixi: Init` | `pixi init <project type> --platform <platform> --channel <channel> <PATH>` | Initialize a new Pixi project through an interactive menu to choose from available project types, platforms, and channels.
+| `Pixi: Add Channel` | `Pixi: Add Channel` | `pixi project channel add <channel>` | Add channels to an existing Pixi project through an interactive menu to choose from available channels.
+| `Pixi: Add Package` | `Pixi: Add Package` | `pixi add <package>` | Add packages to an existing Pixi project through an interactive menu to choose from available packages. |
+| `Pixi: Set Python Interpreter` | `unavailable` | `N/A` | Choose a environment from Pixi's environment list and set the Python interpreter for the workspace.
+| `Pixi: Activate Environment in new Terminal` | `unavailable` | `pixi shell -e <environment name>` | Activate a Pixi environment in a new terminal.
+| `Pixi: Clear Extension Cache` | `unavailable` | `N/A` | This extension stores previously selected channels and platforms in the extension's cache. This command clears the cache. |
 
 ### Pixi `init` Command
 
