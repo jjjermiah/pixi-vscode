@@ -1,10 +1,16 @@
+<center>
+
+<img src="./assets/images/VSCode-Pixi-Logo.png" alt="VSCode" width="220" height="220">
+
 # Pixi Support for Visual Studio Code
 
-This extension provides a set of tools for developing with PixiJS in Visual Studio Code.
+This extension provides a set of tools for developing with [Pixi](https://pixi.sh) in Visual Studio Code.
+
+</center>
 
 ## Features
 
-#### TODO List
+**TODO List**
 
 - [x] Initialize a new Pixi project
 - [x] Add channels to an existing Pixi project

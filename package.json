@@ -2,9 +2,9 @@
   "name": "pixi-vscode",
   "displayName": "Pixi VSCode",
   "description": "Pixi support for Visual Studio Code to manage Pixi projects",
-  "icon": "assets/images/prefix_logo_temp.png",
+  "icon": "assets/images/VSCode-Pixi-Logo.png",
   "publisher": "jjjermiah",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,9 +24,7 @@
     "Other"
   ],
   "preview": true,
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
