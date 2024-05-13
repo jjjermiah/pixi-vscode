@@ -14,6 +14,8 @@ This extension provides a set of tools for developing with [Pixi](https://pixi.s
 > This extension is in early development and should not be considered stable.
 > Please report any issues or feature requests to the [GitHub repository](https://github.com/jjjermiah/pixi-vscode).
 
+The prefix team is working on a [contribution to the official Python VSCode extension](https://github.com/microsoft/vscode-python/pull/22968) to add Pixi support. This extension will be augmented once that contribution is merged.
+
 ## Features
 
 **TODO List**
