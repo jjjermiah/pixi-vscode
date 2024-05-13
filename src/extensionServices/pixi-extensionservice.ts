@@ -205,7 +205,6 @@ export class PixiExtensionService {
 			await this.pixi_service.pixi.getPythonInterpreterPath(
 				selectedPythonEnv
 			);
-
 		// check if the selected python path is valid and exists
 		if (!fs.existsSync(selectedPythonPath)) {
 			notify.error(

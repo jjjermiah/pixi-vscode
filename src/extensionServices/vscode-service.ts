@@ -20,35 +20,51 @@ export class VSCodeExtensionService {
 	public async setPythonInterpreterPath(
 		pythonPath: string
 	): Promise<ResolvedEnvironment | undefined> {
-		// TODO think about using this configuration target
-		// Dont think this is necessary
-		// await vscode.workspace.getConfiguration().update(
-		// 	"python.defaultInterpreterPath",
-		// 	pythonPath,
-		// 	vscode.ConfigurationTarget.Workspace
-		// );
+		try {
+			// Update the default Python interpreter path for the workspace
+			await vscode.workspace
+				.getConfiguration()
+				.update(
+					"python.defaultInterpreterPath",
+					pythonPath,
+					vscode.ConfigurationTarget.Workspace
+				);
 
-		const pythonApi: PythonExtension = await PythonExtension.api();
+			// Get the Python extension API
+			const pythonApi: PythonExtension = await PythonExtension.api();
 
-		const environmentPath: EnvironmentPath = {
-			id: "mynewEnv",
-			path: pythonPath,
-		};
-		const myenvironment: ResolvedEnvironment | undefined =
-			await pythonApi.environments.resolveEnvironment(environmentPath);
+			// Create the environment path object
+			const environmentPath: EnvironmentPath = {
+				id: "mynewEnv",
+				path: pythonPath,
+			};
 
-		if (myenvironment === undefined) {
-			return undefined;
-		}
+			// Resolve the environment using the Python extension API
+			const myenvironment: ResolvedEnvironment | undefined =
+				await pythonApi.environments.resolveEnvironment(
+					environmentPath
+				);
 
-		pythonApi.environments.updateActiveEnvironmentPath(myenvironment);
-		await pythonApi.environments.refreshEnvironments();
+			if (myenvironment === undefined) {
+				return undefined;
+			}
 
-		const activeEnvironmentPath: EnvironmentPath | undefined =
-			pythonApi.environments.getActiveEnvironmentPath();
+			await pythonApi.environments
+				.updateActiveEnvironmentPath(myenvironment)
+				.then(() => {
+					info("Python interpreter set to: " + pythonPath);
+					pythonApi.environments.refreshEnvironments();
+				});
 
-		if (activeEnvironmentPath) {
-			return myenvironment;
+			// Get the active environment path
+			const activeEnvironmentPath: EnvironmentPath | undefined =
+				pythonApi.environments.getActiveEnvironmentPath();
+
+			if (activeEnvironmentPath) {
+				return myenvironment;
+			}
+		} catch (e) {
+			error("Error setting Python interpreter path: " + e);
 		}
 		return undefined;
 	}

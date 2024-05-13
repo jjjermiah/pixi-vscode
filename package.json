@@ -1,21 +1,29 @@
 {
   "name": "pixi-vscode",
-  "displayName": "pixi-vscode",
+  "displayName": "Pixi VSCode",
+  "description": "Pixi support for Visual Studio Code to manage Pixi projects",
+  "icon": "assets/images/prefix_logo_temp.png",
   "publisher": "jjjermiah",
-  "description": "Pixi support for Visual Studio Code",
   "version": "0.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jjjermiah/pixi-vscode"
   },
-  "icon": "assets/images/prefix_logo_temp.png",
   "engines": {
     "vscode": "^1.89.0"
   },
+  "keywords": [
+    "pixi",
+    "pixi.sh",
+    "vscode",
+    "python",
+    "package manager"
+  ],
   "categories": [
     "Other"
   ],
+  "preview": true,
   "activationEvents": [
     "onStartupFinished"
   ],
