@@ -23,6 +23,15 @@ This extension provides a set of tools for developing with [Pixi](https://pixi.s
 - [ ] Install an environment from a Pixi project.
 - [ ] Add functionality to handle `pixi.toml` and `pyproject.toml` files with [tool.pixi]
 
+| Command Palette Command | Context Menu (right-click on folder)| Pixi Command | Description |
+| --- | --- | --- | --- |
+| `Pixi: Init` | `Pixi: Init` | `pixi init` | Initialize a new Pixi project through an interactive menu to choose project type, additional channels, and platforms. |
+| `Pixi: Add Channel` | `Pixi: Add Channel` | `pixi add channel` | Add channels to an existing Pixi project through an interactive menu to choose from available public channels. |
+| `Pixi: Add Package` | `Pixi: Add Package` | `pixi add package` | Add packages to an existing Pixi project through an interactive menu to choose from available packages. |
+| `Pixi: Set Python Interpreter` | `unavailable` | `pixi set python` | Choose a environment from Pixi's environment list and set the Python interpreter for the workspace.
+| `Pixi: Activate Environment in new Terminal` | `unavailable` | `pixi shell` | Choose an environment from the pixi project and activate it in a new terminal. |
+| `Pixi: Clear Extension Cache` | `unavailable` | `pixi clear cache` | This extension stores previously selected channels and platforms in the extension's cache. This command clears the cache. |
+
 ### Pixi `init` Command
 
 Initialize a new Pixi project from:

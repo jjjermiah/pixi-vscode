@@ -4,3 +4,7 @@ node_modules
 .vscode-test/
 *.vsix
 cov/
+# pixi environments
+.pixi
+*.egg-info
+

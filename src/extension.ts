@@ -64,6 +64,14 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"pixi-vscode.activateEnvironmentTerminal",
+			async (uri: vscode.Uri) => {
+				await pxe.activateEnvironmentTerminal(uri);
+			}
+		)
+	);
 }
 
 // This method is called when your extension is deactivated

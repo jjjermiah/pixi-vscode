@@ -491,4 +491,22 @@ export class PixiService implements IPixiService {
 	): Promise<string[] | undefined> {
 		return this.pixi.Features(manifestPath);
 	}
+
+	public async chooseEnvironment(manifestPath?: string): Promise<string> {
+		const allEnvironments = await this.getEnvironmentNames(manifestPath);
+		if (!allEnvironments) {
+			notify.error("No environments found");
+			return "";
+		}
+		const selectedEnvironment = await this.showQuickPick({
+			title: "Select Environment",
+			placeholder: "Select an environment",
+			items: allEnvironments.map((environment: any) => ({
+				label: environment,
+			})),
+			canSelectMany: false,
+		});
+		if (!selectedEnvironment) return "";
+		return selectedEnvironment[0];
+	}
 }

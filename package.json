@@ -4,7 +4,7 @@
   "description": "Pixi support for Visual Studio Code to manage Pixi projects",
   "icon": "assets/images/VSCode-Pixi-Logo.png",
   "publisher": "jjjermiah",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -47,6 +47,10 @@
       {
         "command": "pixi-vscode.setPythonInterpreter",
         "title": "Pixi: Set Python Interpreter"
+      },
+      {
+        "command": "pixi-vscode.activateEnvironmentTerminal",
+        "title": "Pixi: Activate Environment in new Terminal"
       }
     ],
     "menus": {

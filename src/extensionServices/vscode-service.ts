@@ -125,7 +125,21 @@ export class VSCodeExtensionService {
 		}
 	}
 
-	public async openTerminalAndRunCommand(command: string): Promise<boolean> {
+	public async openTerminalAndRunCommand(
+		command: string,
+		terminalName?: string,
+		newterminal?: boolean
+	): Promise<boolean> {
+		if (newterminal) {
+			const terminal = vscode.window.createTerminal({
+				name: terminalName || "Pixi Terminal",
+				hideFromUser: false,
+			});
+			terminal.show();
+			terminal.sendText(command);
+			return true;
+		}
+
 		const terminal = await this.getActiveTerminal();
 		//TODO add config option to show terminal
 		//this.terminal.show(this.config.preserveEditorFocus);

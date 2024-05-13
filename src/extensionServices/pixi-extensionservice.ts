@@ -54,9 +54,6 @@ export class PixiExtensionService {
 					"Created project directory: " +
 						pixiProject.projectDir.fsPath
 				);
-				this.vse.openFolderInCurrentWindow(
-					pixiProject.projectDir.fsPath
-				);
 			} catch (err) {
 				notify.error("Failed to create directory: " + err);
 				return;
@@ -68,10 +65,14 @@ export class PixiExtensionService {
 
 		// TODO clean this section up. This is a workaround to check if the init worked
 		if (commandResults) {
-			// sleep for 2 seconds to allow the manifest file to be created
+			// sleep for 1 seconds to allow the manifest file to be created
 
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			if (pixiProject.updateWorkspaceFolder) {
+				this.vse.openFolderInCurrentWindow(
+					pixiProject.projectDir.fsPath
+				);
+			}
 			notify.info("Pixi project initialized successfully");
 			// Test if the init worked by looking for the manifest file
 			const manifestPath = await this.findManifestFile(
@@ -223,6 +224,42 @@ export class PixiExtensionService {
 				}
 				notify.info(`Python interpreter set to ${env.path}`);
 			});
+	}
+
+	async activateEnvironmentTerminal(uri: vscode.Uri) {
+		if (await this.vse.isEmptyWorkspace()) {
+			notify.error("No workspace folders open");
+			return;
+		}
+		const pixiProject = await this.getPixiProjectDir(uri);
+		if (!pixiProject.projectDir) return; // if user cancels the prompt
+
+		const manifestPath = await this.findManifestFile(
+			pixiProject.projectDir.fsPath
+		);
+		const envs = await this.pixi_service.getEnvironmentInfo(manifestPath);
+		if (!envs) {
+			notify.error("No environments found");
+			return;
+		}
+
+		const chosenEnvironment = await this.pixi_service.chooseEnvironment(
+			manifestPath
+		);
+		if (!chosenEnvironment) {
+			notify.error("No environment selected");
+			return;
+		}
+		const env = envs.find((e: any) => e.name === chosenEnvironment);
+		if (!env) {
+			notify.error("Environment not found");
+			return;
+		}
+
+		const cmd = `pixi shell -e ${env.name} --manifest-path ${manifestPath}`;
+		console.log(cmd);
+		// run "pixi shell -e $env" command
+		this.vse.openTerminalAndRunCommand(cmd, `Pixi: ${env.name}`, true);
 	}
 
 	/**
