@@ -1,12 +1,18 @@
-<center>
-
-<img src="./assets/images/VSCode-Pixi-Logo.png" alt="VSCode" width="220" height="220">
-
 # Pixi Support for Visual Studio Code
+<div align="center">
+
+<img src="https://github.com/jjjermiah/pixi-vscode/blob/main/assets/images/VSCode-Pixi-Logo.png?raw=true" alt="VSCode" width="220" height="220">
+
+[![VS Code Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/jjjermiah.pixi-vscode
+)](https://marketplace.visualstudio.com/items?itemName=jjjermiah.pixi-vscode)
 
 This extension provides a set of tools for developing with [Pixi](https://pixi.sh) in Visual Studio Code.
 
-</center>
+</div>
+
+> [!Note] 
+> This extension is in early development and should not be considered stable.
+> Please report any issues or feature requests to the [GitHub repository](https://github.com/jjjermiah/pixi-vscode).
 
 ## Features
 
