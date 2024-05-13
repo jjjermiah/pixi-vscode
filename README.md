@@ -18,6 +18,15 @@ This extension provides a set of tools for developing with [Pixi](https://pixi.s
 
 **TODO List**
 
+- [ ] Need to create a testing suite for the extension.
+- [ ] Implement a logging system for the extension.
+- [ ] Implement CI/CD to:
+  - [ ] Run tests
+  - [ ] Semantic versioning
+  - [ ] Change log generation
+  - [ ] Implement release process:
+    - [ ] Build and package the extension
+    - [ ] Publish the extension to the marketplace
 - [x] Initialize a new Pixi project
 - [x] Add channels to an existing Pixi project
 - [x] Add packages to an existing Pixi project
