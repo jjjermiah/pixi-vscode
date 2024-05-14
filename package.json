@@ -135,9 +135,7 @@
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^10.0.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/vscode": "^1.89.0",
@@ -145,6 +143,7 @@
     "@typescript-eslint/parser": "^7.7.1",
     "@vscode/test-cli": "^0.0.8",
     "@vscode/test-electron": "^2.3.9",
+    "conventional-changelog-conventionalcommits": "7.0.2",
     "eslint": "^8.57.0",
     "glob": "^10.3.14",
     "mocha": "^10.4.0",
@@ -165,34 +164,5 @@
     "graphql": "^16.8.1",
     "react": "^18.3.1",
     "vscode-cache": "^0.3.0"
-  },
-  "release": {
-    "branches": [
-      "main"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
-      "@semantic-release/github",
-      [
-        "@semantic-release/exec",
-        {
-          "prepareCmd": "vsce package --pre-release",
-          "publishCmd": "vsce publish --pre-release -p $VSCE_TOKEN"
-        }
-      ],
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "CHANGELOG.md",
-            "package.json",
-            "yarn.lock"
-          ],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-        }
-      ]
-    ]
   }
 }

@@ -15,7 +15,7 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-latest] #, windows-latest, macos-latest]
-                node-version: [20, 21]
+                node-version: [20]
 
         steps:
             - name: Checkout repository
@@ -43,7 +43,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 21
+                  node-version: 20
                   cache: "yarn"
 
             - name: Lint on Linux
@@ -54,7 +54,13 @@ jobs:
     release:
         name: Release
         runs-on: ubuntu-latest
-        if: ${{ (github.ref == 'refs/heads/main') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name)) }}
+        # if: ${{ (github.ref == 'refs/heads/main') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name)) }}
+        if: ${{ (github.ref == 'refs/heads/main') }}
+
+        permissions:
+            contents: write
+            packages: write
+            actions: write
 
         steps:
             - name: Checkout repository
@@ -63,10 +69,13 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 21
+                  node-version: 20
+                  cache: "yarn"
 
-            # - name: Run semantic-release
-            #   env:
-            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #       VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
-            #   run: npx semantic-release
+            - name: Install dependencies
+              run: yarn
+
+            - name: Run semantic-release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: npx semantic-release
