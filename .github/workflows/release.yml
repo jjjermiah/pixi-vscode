@@ -1,0 +1,30 @@
+name: Release
+
+on:
+    push:
+        branches: ["main", "development"]
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v2
+              with:
+                  node-version: "14"
+
+            - name: Install Yarn
+              run: npm install --global yarn
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Run semantic-release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+              run: npx semantic-release
