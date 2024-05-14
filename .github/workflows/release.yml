@@ -1,30 +1,87 @@
 name: Release
 
 on:
-    push:
-        branches: ["main", "development"]
+	push:
+		branches: ["main", "development"]
+
+concurrency:
+	group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+	cancel-in-progress: true
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
+	test:
+		runs-on: ${{ matrix.os }}
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+		strategy:
+			matrix:
+				os: [ubuntu-latest] #, windows-latest, macos-latest]
+				node-version: [20, 21]
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v2
-              with:
-                  node-version: "14"
+		steps:
+			- name: Checkout repository
+				uses: actions/checkout@v4
 
-            - name: Install Yarn
-              run: npm install --global yarn
+			- name: Setup Node.js
+				uses: actions/setup-node@v3
+				with:
+					node-version: ${{ matrix.node-version }}
+					cache: "yarn"
 
-            - name: Install dependencies
-              run: yarn install
+			- name: Test on Linux ${{ matrix.node-version }}
+				if: runner.os == 'Linux'
+					run: |
+						yarn install
+						xvfb-run -a yarn test
 
-            - name: Run semantic-release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
-              run: npx semantic-release
+	lint:
+		runs-on: ubuntu-latest
+
+		steps:
+			- name: Checkout repository
+				uses: actions/checkout@v4
+
+			- name: Setup Node.js
+				uses: actions/setup-node@v3
+				with:
+						node-version: 21
+						cache: "yarn"
+
+			- name: Lint on Linux
+				run: |
+						yarn install
+						yarn lint
+
+	release:
+		name: Release
+		runs-on: ubuntu-latest
+		if: ${{ (github.ref == 'refs/heads/main') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name)) }}
+
+		steps:
+			- name: Checkout repository
+				uses: actions/checkout@v4
+
+			- name: Setup Node.js
+				uses: actions/setup-node@v3
+				with:
+						node-version: 21
+
+			- name: Run install
+				uses: borales/actions-yarn@v4
+				with:
+						cmd: install # will run `yarn install` command
+
+			- name: Run build
+				uses: borales/actions-yarn@v4
+				with:
+						cmd: compile # will run `yarn compile` command
+
+			# - name: Run test
+			#   uses: borales/actions-yarn@v4
+			#   with:
+			#       cmd: test # will run `yarn test` command
+
+			# # - name: Run semantic-release
+			# #   env:
+			# #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+			# #       VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+			# #   run: npx semantic-release
