@@ -1,6 +1,7 @@
 {
   "branches": [
-    "main"
+    "main",
+    "development"
   ],
   "plugins": [
     [
@@ -86,7 +87,7 @@
       },
       {
         "type": "build",
-        "section": "Build System"
+        "section": "Build"
       },
       {
         "type": "ci",
