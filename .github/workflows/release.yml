@@ -4,8 +4,36 @@ on:
     push:
         branches: ["main", "development"]
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+    cancel-in-progress: true
+
 jobs:
-    release:
+    test:
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                node-version: [20]
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "yarn"
+
+            - name: Test on Linux ${{ matrix.node-version }}
+              if: runner.os == 'Linux'
+              run: |
+                  yarn install
+                  xvfb-run -a yarn test
+
+    lint:
         runs-on: ubuntu-latest
 
         steps:
@@ -13,18 +41,41 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Setup Node.js
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v3
               with:
-                  node-version: "14"
+                  node-version: 20
+                  cache: "yarn"
 
-            - name: Install Yarn
-              run: npm install --global yarn
+            - name: Lint on Linux
+              run: |
+                  yarn install
+                  yarn lint
+
+    release:
+        name: Release
+        runs-on: ubuntu-latest
+        # if: ${{ (github.ref == 'refs/heads/main') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name)) }}
+        if: ${{ (github.ref == 'refs/heads/main') }}
+
+        permissions:
+            contents: write
+            packages: write
+            actions: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20
+                  cache: "yarn"
 
             - name: Install dependencies
-              run: yarn install
+              run: yarn
 
             - name: Run semantic-release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
               run: npx semantic-release
