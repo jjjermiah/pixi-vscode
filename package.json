@@ -71,6 +71,11 @@
           "when": "explorerResourceIsFolder"
         },
         {
+          "command": "pixi-vscode.addPyPiPackages",
+          "group": "1_pixi",
+          "when": "explorerResourceIsFolder"
+        },
+        {
           "command": "pixi-vscode.addChannels",
           "group": "1_pixi",
           "when": "explorerResourceIsFolder"

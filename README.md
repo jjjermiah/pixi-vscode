@@ -24,6 +24,7 @@ The prefix team is working on a [contribution to the official Python VSCode exte
 | `Pixi: Init` | `Pixi: Init` | `pixi init <project type> --platform <platform> --channel <channel> <PATH>` | Initialize a new Pixi project through an interactive menu to choose from available project types, platforms, and channels.
 | `Pixi: Add Channel` | `Pixi: Add Channel` | `pixi project channel add <channel>` | Add channels to an existing Pixi project through an interactive menu to choose from available channels.
 | `Pixi: Add Package` | `Pixi: Add Package` | `pixi add <package>` | Add packages to an existing Pixi project through an interactive menu to choose from available packages. |
+| `Pixi: Add PyPi Package` | `Pixi: Add PyPi Package` | `pixi add <package>` | Add PyPi packages to an existing Pixi project through an interactive menu to choose from available packages.
 | `Pixi: Set Python Interpreter` | `unavailable` | `N/A` | Choose a environment from Pixi's environment list and set the Python interpreter for the workspace.
 | `Pixi: Activate Environment in new Terminal` | `unavailable` | `pixi shell -e <environment name>` | Activate a Pixi environment in a new terminal.
 | `Pixi: Clear Extension Cache` | `unavailable` | `N/A` | This extension stores previously selected channels and platforms in the extension's cache. This command clears the cache. |
@@ -53,12 +54,12 @@ You can set the `pixi-vscode.defaultChannels` setting to include a list of chann
 > API key to the `Pixi: Prefix API Key` setting in the VSCode settings.
 > The extension will then include your private channels in the list of available channels.
 
-### Pixi `add package` Command
+### Pixi `add package` and `add PyPi package` Commands
 
 Add packages to an existing Pixi project from:
 
-- Command Palette (`Ctrl+Shift+P` then `Pixi: Add Package`)
-- Context Menu (`Right Click` on a folder then `Pixi: Add Package`)
+- Command Palette (`Ctrl+Shift+P` then `Pixi: Add Package`) or (`Ctrl+Shift+P` then `Pixi: Add PyPi Package`)
+- Context Menu (`Right Click` on a folder then `Pixi: Add Package`) or (`Right Click` on a folder then `Pixi: Add PyPi Package`)
 
 ### Pixi `set Python Interpreter` Command
 
