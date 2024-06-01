@@ -1,9 +1,20 @@
 {
   "branches": [
-    "main"
+    "main",
+    "development"
   ],
   "plugins": [
-    "@semantic-release/commit-analyzer",
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "releaseRules": [
+          {
+            "type": "*",
+            "release": "patch"
+          }
+        ]
+      }
+    ],
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
     [
@@ -76,7 +87,7 @@
       },
       {
         "type": "build",
-        "section": "Build System"
+        "section": "Build"
       },
       {
         "type": "ci",

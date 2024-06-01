@@ -9,8 +9,8 @@ import {
 	PythonExtension,
 	ResolvedEnvironment,
 } from "@vscode/python-extension";
-
 import { VSCodeExtensionService } from "./vscode-service";
+import { PypiClient, PypiService } from "../pypi";
 
 // Calls to this class are only made from src/extension.ts
 export class PixiExtensionService {
@@ -18,9 +18,9 @@ export class PixiExtensionService {
 	private pixi_service: PixiService;
 	private cache: typeof Cache;
 
-	constructor(cache: typeof Cache) {
+	constructor(cache: typeof Cache, pypiService: PypiService) {
 		this.cache = cache;
-		this.pixi_service = new PixiService(cache);
+		this.pixi_service = new PixiService(cache, pypiService);
 	}
 
 	/**
@@ -52,8 +52,7 @@ export class PixiExtensionService {
 					recursive: true,
 				});
 				notify.info(
-					"Created project directory: " +
-						pixiProject.projectDir.fsPath
+					"Created project directory: " + pixiProject.projectDir.fsPath
 				);
 			} catch (err) {
 				notify.error("Failed to create directory: " + err);
@@ -70,9 +69,7 @@ export class PixiExtensionService {
 
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			if (pixiProject.updateWorkspaceFolder) {
-				this.vse.openFolderInCurrentWindow(
-					pixiProject.projectDir.fsPath
-				);
+				this.vse.openFolderInCurrentWindow(pixiProject.projectDir.fsPath);
 			}
 			notify.info("Pixi project initialized successfully");
 			// Test if the init worked by looking for the manifest file
@@ -109,9 +106,7 @@ export class PixiExtensionService {
 			pixiProject.projectDir.fsPath
 		);
 
-		const existingChannels = await this.pixi_service.getChannels(
-			manifestPath
-		);
+		const existingChannels = await this.pixi_service.getChannels(manifestPath);
 		const args = await this.pixi_service.addChannel(existingChannels);
 
 		args.push(`--manifest-path ${manifestPath}`);
@@ -129,10 +124,49 @@ export class PixiExtensionService {
 		const pixi_project_dir =
 			uri || (await this.vse.chooseWorkspaceFolder())!.uri;
 
-		const manifestPath = await this.findManifestFile(
-			pixi_project_dir.fsPath
-		);
+		const manifestPath = await this.findManifestFile(pixi_project_dir.fsPath);
 		const args = await this.pixi_service.addPackages();
+
+		const features = await this.pixi_service.getEnvironmentFeatures(
+			manifestPath
+		);
+		if (!features) {
+			console.log("No features found");
+		}
+
+		const chosenFeatures = await this.pixi_service.showQuickPick({
+			title: "Feature to add packages to",
+			items: features!.map((feature) => ({
+				label: feature,
+				description: "",
+			})),
+			placeholder: "Select a feature",
+			canSelectMany: false,
+			selectedItems: [{ label: "default", description: "" }],
+		});
+		const feature = chosenFeatures ? chosenFeatures[0] : "default";
+		if (feature !== "default") {
+			args.push(`--feature ${feature}`);
+		}
+
+		args.push(`--manifest-path ${manifestPath}`);
+
+		console.log("pixi " + args.join(" "));
+		this.vse.runPixiCommand(args);
+	}
+
+	async addPyPiPackages(uri: vscode.Uri) {
+		const pixi_project_dir =
+			uri || (await this.vse.chooseWorkspaceFolder())!.uri;
+
+		const manifestPath = await this.findManifestFile(pixi_project_dir.fsPath);
+
+		// for each package, the arg is "--pypi <package-name>"
+		const args = await this.pixi_service.addPyPiPackages();
+		if (!args) {
+			console.log("No packages found");
+			return;
+		}
 
 		const features = await this.pixi_service.getEnvironmentFeatures(
 			manifestPath
@@ -183,8 +217,7 @@ export class PixiExtensionService {
 		const items: vscode.QuickPickItem[] = await Promise.all(
 			envs.map(async (env: any) => ({
 				label: env.name,
-				description:
-					await this.pixi_service.pixi.getPythonInterpreterPath(env),
+				description: await this.pixi_service.pixi.getPythonInterpreterPath(env),
 				detail: env.dependencies.join(", "),
 			}))
 		);
@@ -204,9 +237,7 @@ export class PixiExtensionService {
 		console.log(`Selected Python Path: ${selectedPythonEnv.name}`);
 
 		const selectedPythonPath =
-			await this.pixi_service.pixi.getPythonInterpreterPath(
-				selectedPythonEnv
-			);
+			await this.pixi_service.pixi.getPythonInterpreterPath(selectedPythonEnv);
 		// check if the selected python path is valid and exists
 		if (!fs.existsSync(selectedPythonPath)) {
 			notify.error(
@@ -311,8 +342,6 @@ export class PixiExtensionService {
 	}
 
 	async findManifestFile(pixi_project_dir: string) {
-		return (
-			(await this.pixi_service.findProjectFile(pixi_project_dir)) || ""
-		);
+		return (await this.pixi_service.findProjectFile(pixi_project_dir)) || "";
 	}
 }

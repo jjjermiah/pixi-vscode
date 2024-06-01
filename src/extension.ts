@@ -5,12 +5,17 @@ import * as vscode from "vscode";
 import { info, warn, error } from "./common/logging";
 import { Pixi } from "./environmentManagers/pixi";
 import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
+import { PypiService } from "./pypi/pypi-service";
+import { PypiClient } from "./pypi/pypi-client";
 const Cache = require("vscode-cache");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	const cache = new Cache(context);
-
+	const pypiService = new PypiService(
+		context.globalStorageUri,
+		PypiClient.default()
+	);
 	let disposable = vscode.commands.registerCommand(
 		"pixi-vscode.helloWorld",
 		() => {
@@ -20,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 
-	const pxe = new PixiExtensionService(cache);
+	const pxe = new PixiExtensionService(cache, pypiService);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
@@ -45,6 +50,15 @@ export function activate(context: vscode.ExtensionContext) {
 			"pixi-vscode.addPackages",
 			async (uri: vscode.Uri) => {
 				await pxe.addPackages(uri);
+			}
+		)
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"pixi-vscode.addPyPiPackages",
+			async (uri: vscode.Uri) => {
+				await pxe.addPyPiPackages(uri);
 			}
 		)
 	);
