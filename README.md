@@ -18,27 +18,6 @@ The prefix team is working on a [contribution to the official Python VSCode exte
 
 ## Features
 
-**TODO List**
-
-- [ ] Need to create a testing suite for the extension.
-- [ ] Implement a logging system for the extension.
-- [ ] Implement CI/CD to:
-  - [ ] Run tests
-  - [ ] Semantic versioning
-  - [ ] Change log generation
-  - [ ] Implement release process:
-    - [ ] Build and package the extension
-    - [ ] Publish the extension to the marketplace
-- [x] Initialize a new Pixi project
-- [x] Add channels to an existing Pixi project
-- [x] Add packages to an existing Pixi project
-- [x] Set Python interpreter for a Pixi project
-  - [ ] refactor to check for installed environments and if the python binary exists.
-- [ ] Add platforms to an existing Pixi project
-- [ ] Run tasks via cmd palette
-- [ ] Add pypi packages to a Pixi project
-- [ ] Install an environment from a Pixi project.
-- [ ] Add functionality to handle `pixi.toml` and `pyproject.toml` files with [tool.pixi]
 
 | Command Palette Command | Context Menu (right-click on folder)| Pixi Command | Description |
 | --- | --- | --- | --- |
@@ -92,3 +71,34 @@ Given an opened Pixi project, choose from the project's environments to set the 
 > This comman also requires for each environment to be installed with
 > `pixi install -e <environment name>`.
 > If you have not installed the environment, the command will behave unexpectedly.
+
+
+### ROADMAP
+
+- [ ] Need to create a testing suite for the extension.
+- [ ] Implement a logging system for the extension.
+- [ ] Implement CI/CD to:
+  - [ ] Run tests
+  - [ ] Semantic versioning
+  - [ ] Change log generation
+  - [ ] Implement release process:
+    - [ ] Build and package the extension
+    - [ ] Publish the extension to the marketplace
+- [x] Initialize a new Pixi project
+- [x] Add channels to an existing Pixi project
+- [x] Add packages to an existing Pixi project
+- [x] Set Python interpreter for a Pixi project
+  - [ ] refactor to check for installed environments and if the python binary exists.
+- [ ] Add platforms to an existing Pixi project
+- [ ] Run tasks via cmd palette
+- [x] Add pypi packages to a Pixi project
+- [ ] Install an environment from a Pixi project.
+- [ ] Add functionality to handle `pixi.toml` and `pyproject.toml` files with [tool.pixi]
+
+#### Syntax Highlighting
+**Not implemented yet**
+A lot more work is needed but it would be really cool to have some syntax
+highlighting + recognizing syntax for features within the `pixi.toml` and `pyproject.toml` files.
+
+Proof of concept highlighting the tasks and dependencies in a `pixi.toml` file: 
+![poc-syntax-highlighting](assets/preview_highlight.png)
