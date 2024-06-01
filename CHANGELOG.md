@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/jjjermiah/pixi-vscode/compare/v1.0.0...v1.0.1) (2024-06-01)
+
+
+### Miscellaneous Chores
+
+* bump version to 1.0.1 ([61198d4](https://github.com/jjjermiah/pixi-vscode/commit/61198d432df08a171d1542a0b251fdf9097be11b))
+
 ## 1.0.0 (2024-06-01)
 
 
