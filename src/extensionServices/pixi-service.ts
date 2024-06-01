@@ -4,7 +4,7 @@ import * as notify from "../common/logging";
 const Cache = require("vscode-cache");
 import { PrefixClient } from "../prefixAPI/prefix-client";
 import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
-
+import { PypiClient, PypiService } from "../pypi";
 import {
 	PixiProjectInfo,
 	PixiInfo,
@@ -26,9 +26,7 @@ interface IPixiService {
 	addChannel(definedChannels?: string[]): Promise<string[]>;
 	findProjectFile(dir: string): Promise<string>;
 	getChannels(manifestPath?: string): Promise<string[] | undefined>;
-	getEnvironmentFeatures(
-		manifestPath?: string
-	): Promise<string[] | undefined>;
+	getEnvironmentFeatures(manifestPath?: string): Promise<string[] | undefined>;
 }
 
 /**
@@ -38,24 +36,35 @@ export class PixiService implements IPixiService {
 	public pixi: Pixi;
 	private PixiCache: any;
 	private prefixClient = new PrefixClient();
-
+	private pypiService: PypiService;
 	/**
 	 * Initializes a new instance of the PixiService class.
 	 *
 	 * @param cache - The cache object for this user's session.
 	 */
-	constructor(cache: typeof Cache) {
+	constructor(cache: typeof Cache, pypiService: PypiService) {
 		this.pixi = new Pixi(
 			PixiCommand.tool,
 			vscode.workspace.workspaceFolders?.[0].uri.fsPath || process.cwd()
 		);
 		this.PixiCache = cache;
+		this.pypiService = pypiService;
 	}
 
 	async addPackages(definedPackages?: string[]): Promise<string[]> {
 		let args: string[] = [PixiCommand.add];
 		await this.choosePackages(definedPackages).then((packages) => {
 			args.push(...packages);
+		});
+		return args;
+	}
+
+	async addPyPiPackages(definedPackages?: string[]): Promise<string[]> {
+		let args: string[] = [PixiCommand.add];
+		await this.choosePackages(definedPackages, "pypi").then((packages) => {
+			packages.forEach((pkg) => {
+				args.push("--pypi", pkg);
+			});
 		});
 		return args;
 	}
@@ -67,7 +76,10 @@ export class PixiService implements IPixiService {
 	 *  already defined.
 	 * @returns A promise that resolves with an array of selected package names.
 	 */
-	async choosePackages(definedPackages?: string[]): Promise<string[]> {
+	async choosePackages(
+		definedPackages?: string[],
+		type: string = "conda"
+	): Promise<string[]> {
 		const qp = vscode.window.createQuickPick();
 		qp.title =
 			"Enter package name. Choose an optiopn from the dropdown by pressing <space>";
@@ -83,12 +95,30 @@ export class PixiService implements IPixiService {
 			qp.busy = true;
 			progressCounter += 1;
 
-			const packageChannels: {
+			let packageChannels: {
 				channel: string;
 				package: string;
 				summary: string;
 				version: string;
-			}[] = await this.prefixClient.getPackages(userInput);
+			}[] = [];
+
+			if (type === "conda") {
+				packageChannels = await this.prefixClient.getPackages(userInput);
+			} else if (type === "pypi") {
+				packageChannels =
+					(await this.pypiService.searchPackages(userInput)?.map((pkg: any) => {
+						if (!pkg)
+							return { channel: "pypi", package: "", summary: "", version: "" };
+
+						return {
+							channel: "pypi",
+							package: `${pkg.name}`,
+							summary: "",
+							version: "",
+						};
+					})) || [];
+			}
+
 			progressCounter -= 1;
 
 			if (!progressCounter) {
@@ -96,6 +126,13 @@ export class PixiService implements IPixiService {
 			}
 
 			qp.items = packageChannels?.map((pkg) => {
+				if (type === "pypi") {
+					return {
+						label: `${pkg.package}`,
+						description: `from ${pkg.channel}`,
+						detail: pkg.summary,
+					};
+				}
 				return {
 					label: `${pkg.package}`,
 					description: `(${pkg.version}) from ${pkg.channel}`,
@@ -232,9 +269,7 @@ export class PixiService implements IPixiService {
 		let selectedItems: vscode.QuickPickItem[] = [];
 
 		if (definedChannels) {
-			items = items.filter(
-				(item) => !definedChannels.includes(item.label)
-			);
+			items = items.filter((item) => !definedChannels.includes(item.label));
 			selectedItems = [];
 		} else {
 			selectedItems = items.filter((item) =>
@@ -252,9 +287,7 @@ export class PixiService implements IPixiService {
 			// only unique values are stored
 			this.PixiCache.put(
 				"selectedChannels",
-				Array.from(
-					new Set([...previouslySelectedChannels, ...channels])
-				)
+				Array.from(new Set([...previouslySelectedChannels, ...channels]))
 			);
 			return channels;
 		});
@@ -264,9 +297,7 @@ export class PixiService implements IPixiService {
 		 * and return the name if owner is empty, otherwise return baseUrl
 		 */
 		return selectedChannels.map((selectedChannel: any) => {
-			const channel = allChannels.find(
-				(c: any) => c.name === selectedChannel
-			)!;
+			const channel = allChannels.find((c: any) => c.name === selectedChannel)!;
 			return channel.owner ? channel.baseUrl : channel.name;
 		});
 	}
@@ -292,15 +323,13 @@ export class PixiService implements IPixiService {
 			[]
 		).filter((platform: any) => !defaultPlatforms.includes(platform));
 		// all other platforms
-		const otherPlatforms = Object.values(PixiPlatform).filter(
-			(platform) => {
-				return ![
-					userPlatform,
-					...previouslySelectedPlatforms,
-					...defaultPlatforms,
-				].includes(platform);
-			}
-		);
+		const otherPlatforms = Object.values(PixiPlatform).filter((platform) => {
+			return ![
+				userPlatform,
+				...previouslySelectedPlatforms,
+				...defaultPlatforms,
+			].includes(platform);
+		});
 
 		const items = await this.prepareItems({
 			"Default Platforms": defaultPlatforms.map((platform: any) => ({
