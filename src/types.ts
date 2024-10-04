@@ -1,6 +1,7 @@
 import { PixiPlatform } from "./enums";
 
 export type PixiProjectInfo = {
+	name: string;
 	manifest_path: string;
 	last_updated: string;
 	pixi_folder_size?: number;
@@ -28,6 +29,7 @@ export type environments_info = {
 	solve_group: string;
 	environment_size: number;
 	dependencies: string[];
+	pypi_dependencies: string[];
 	tasks: string[];
 	channels: string[];
 	prefix: string;

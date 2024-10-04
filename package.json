@@ -56,8 +56,39 @@
       {
         "command": "pixi-vscode.activateEnvironmentTerminal",
         "title": "Pixi: Activate Environment in new Terminal"
+      },
+      {
+        "command": "pixi-view.openJson",
+        "title": "Pixi: Open Json",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "pixi-view.openSitePackages",
+        "title": "Pixi: Open Site Packages",
+        "icon": "$(open-preview)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pixi",
+          "title": "Pixi",
+          "icon": "assets/images/prefix_logo_temp.png"
+        }
+      ]
+    },
+    "views": {
+      "pixi": [
+        {
+          "id": "pixi_explorer",
+          "name": "Pixi"
+        },
+        {
+          "id": "pixi_envs",
+          "name": "Pixi Envs"
+        }
+      ]
+    },
     "menus": {
       "explorer/context": [
         {
@@ -79,6 +110,24 @@
           "command": "pixi-vscode.addChannels",
           "group": "1_pixi",
           "when": "explorerResourceIsFolder"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pixi-view.openJson",
+          "when": "view == pixi_envs && viewItem == meta_file",
+          "group": "inline"
+        },
+        {
+          "command": "pixi-view.openSitePackages",
+          "when": "view == pixi_envs && viewItem == site_packages",
+          "group": "inline"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pixi-view.openJson",
+          "when": "1==2"
         }
       ]
     },

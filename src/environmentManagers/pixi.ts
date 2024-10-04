@@ -14,36 +14,52 @@ import {
 import { execShellWithTimeout } from "../common/shell";
 import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
 
+// This type corresponds to the output of 'pixi info --json', and property
+// names must be spelled exactly as they are in order to match the schema.
+export type PackageInfo = {
+	name: string;
+	version: string;
+	build: string;
+	size_bytes: number;
+	kind: string;
+	source: string;
+	is_explicit: boolean;
+};
+
+
 export class Pixi {
 	// save the output of the pixi info command
 	public pixiInfo!: PixiInfo | undefined;
 
 	constructor(private readonly command: string, private cwd: string) {
-		this.getPixiInfo()
-			.then((info) => {
-				this.pixiInfo = info;
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		this.initializePixiInfo();
+	}
+
+	private async initializePixiInfo() {
+		try {
+			this.pixiInfo = await this.getPixiInfo();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	public async getPixiInfo(
 		manifestPath?: string
 	): Promise<PixiInfo | undefined> {
-		const info = await execShellWithTimeout(
-			`${this.command} info --json ${
-				manifestPath ? `--manifest-path ${manifestPath}` : ""
-			}`,
-			5000,
-			this.cwd
-		)
-			.then((output) => JSON.parse(output) as PixiInfo)
-			.catch((error) => {
-				console.error(error);
-				return undefined;
-			});
-		return info;
+		try {
+			const output = await execShellWithTimeout(
+				`${this.command} info --json ${
+					manifestPath ? `--manifest-path ${manifestPath}` : ""
+				}`,
+				5000,
+				this.cwd
+			);
+			const info = JSON.parse(output) as PixiInfo;
+			return info;
+		} catch (error) {
+			console.error(error);
+			return undefined;
+		}
 	}
 
 	/**
@@ -55,9 +71,7 @@ export class Pixi {
 		return this.getPixiInfo().then((info) => info?.platform);
 	}
 
-	public async Channels(
-		manifestPath?: string
-	): Promise<string[] | undefined> {
+	public async Channels(manifestPath?: string): Promise<string[] | undefined> {
 		const allChannels: string[] = [];
 		await this.EnvironmentInfo(manifestPath).then((envs) => {
 			envs?.forEach((env) => {
@@ -92,9 +106,7 @@ export class Pixi {
 		);
 	}
 
-	public async Features(
-		manifestPath?: string
-	): Promise<string[] | undefined> {
+	public async Features(manifestPath?: string): Promise<string[] | undefined> {
 		return this.EnvironmentInfo(manifestPath)
 			.then((info) => info?.flatMap((env) => env.features))
 			.then((features) => Array.from(new Set(features)));
@@ -112,6 +124,24 @@ export class Pixi {
 		);
 	}
 
+	public async getEnvironmentPackages(
+		env_name: string,
+		explicit: boolean = true
+	): Promise<PackageInfo[]> {
+		try {
+			const output = await execShellWithTimeout(
+				`${this.command} list ${explicit ? "-x" : ""} -e ${env_name} --json`,
+				5000,
+				this.cwd
+			);
+			const pixiList = JSON.parse(output) as PackageInfo[];
+			return pixiList;
+		} catch (error) {
+			console.error('Failed to get environment packages:', error);
+			return [];
+		}
+	}
+
 	/**
 	 * Returns the path to the Python interpreter used by the workspace.
 	 *
@@ -126,4 +156,6 @@ export class Pixi {
 	): Promise<string> {
 		return `${env_info.prefix}/bin/python`;
 	}
+
+	
 }

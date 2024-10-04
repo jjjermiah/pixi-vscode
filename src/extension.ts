@@ -7,7 +7,11 @@ import { Pixi } from "./environmentManagers/pixi";
 import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
 import { PypiService } from "./pypi/pypi-service";
 import { PypiClient } from "./pypi/pypi-client";
+import { PixiTreeDataProvider } from "./treeProvider/TreeProviderService";
+
 const Cache = require("vscode-cache");
+
+const EXTENSION_NAME = "pixi-vscode";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -86,6 +90,33 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		)
 	);
+
+	const treeDataProvider = new PixiTreeDataProvider();
+
+	vscode.window.createTreeView("pixi_explorer", {
+		treeDataProvider,
+		showCollapseAll: true,
+	});
+
+	const envsTreeDataProvider = new PixiTreeDataProvider("envs");
+
+	vscode.window.createTreeView("pixi_envs", {
+		treeDataProvider: envsTreeDataProvider,
+		showCollapseAll: true,
+	});
+
+	vscode.commands.registerCommand(
+		"pixi-view.openJson",
+		(file: vscode.TreeItem) => {
+			// // const file_to_open = file.description;
+			vscode.commands.executeCommand(
+				"vscode.open",
+				vscode.Uri.parse(file.value)
+			);
+		}
+	);
+
+
 }
 
 // This method is called when your extension is deactivated
