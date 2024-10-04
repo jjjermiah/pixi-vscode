@@ -7,6 +7,8 @@ import { Pixi } from "./environmentManagers/pixi";
 import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
 import { PypiService } from "./pypi/pypi-service";
 import { PypiClient } from "./pypi/pypi-client";
+import { PixiTaskProvider } from "./pixiTaskProvider";
+
 const Cache = require("vscode-cache");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -20,10 +22,20 @@ export function activate(context: vscode.ExtensionContext) {
 		"pixi-vscode.helloWorld",
 		() => {
 			info("Hello World from pixi-vscode!");
+			// const configure_default_build_tasks = vscode.commands.executeCommand(
+			// 	"workbench.action.tasks.configureDefaultBuildTask"
+			// ).then((tasks) => {
+			// 	console.log(tasks);
+			// });
+			// const availCommands = vscode.commands.getCommands().then((commands) => {
+			// 	console.log(commands);
+			// });
+			// console.log(configure_default_build_tasks);
+			// console.log(availCommands);
+
+
 		}
 	);
-
-	context.subscriptions.push(disposable);
 
 	const pxe = new PixiExtensionService(cache, pypiService);
 
@@ -85,6 +97,11 @@ export function activate(context: vscode.ExtensionContext) {
 				await pxe.activateEnvironmentTerminal(uri);
 			}
 		)
+	);
+
+	vscode.tasks.registerTaskProvider(
+		PixiTaskProvider.TaskType,
+		new PixiTaskProvider()
 	);
 }
 

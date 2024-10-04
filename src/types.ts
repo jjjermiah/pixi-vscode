@@ -28,6 +28,7 @@ export type environments_info = {
 	solve_group: string;
 	environment_size: number;
 	dependencies: string[];
+	pypi_dependencies: string[];
 	tasks: string[];
 	channels: string[];
 	prefix: string;

@@ -15,7 +15,7 @@ import { PypiClient, PypiService } from "../pypi";
 // Calls to this class are only made from src/extension.ts
 export class PixiExtensionService {
 	private vse = new VSCodeExtensionService();
-	private pixi_service: PixiService;
+	public pixi_service: PixiService;
 	private cache: typeof Cache;
 
 	constructor(cache: typeof Cache, pypiService: PypiService) {

@@ -25,10 +25,16 @@
     "Other"
   ],
   "preview": true,
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "pixi-vscode.helloWorld",
+        "title": "Pixi: Hello World"
+      },
       {
         "command": "pixi-vscode.init",
         "title": "Pixi: Init"
@@ -129,7 +135,25 @@
         "view": "workbench.explorer.emptyView",
         "contents": "You can initialize a new Pixi Project with\n[New Pixi Project](command:pixi-vscode.init)\nChoose the folder to create a new Pixi Project in."
       }
-    ]
+    ],
+    "taskDefinitions": [
+			{
+				"type": "Pixi",
+				"required": [
+					"task"
+				],
+				"properties": {
+					"task": {
+						"type": "string",
+						"description": "The Pixi task to customize"
+					},
+					"file": {
+						"type": "string",
+						"description": "The toml file that provides the task. Can be omitted."
+					}
+				}
+			}
+		]
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",

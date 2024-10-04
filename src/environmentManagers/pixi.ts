@@ -14,6 +14,29 @@ import {
 import { execShellWithTimeout } from "../common/shell";
 import { PixiPlatform, PixiCommand, PixiProjectType } from "../enums";
 
+/*
+This class needs to be completely refactored as its not clear what it does
+
+To begin:
+- Rename the class to something more descriptive
+	- Pixi -> PixiManager or PixiExecutor
+
+- Need to figure out exactly when the extension gets activated and how to instantiate this class 
+in a more useful way
+
+- If the class can be instantiated when any command is run, then the class should always be instantiated
+with the information from the info command using the manifest path
+
+- this way, the class can be used to get information about the project at any time
+
+- the constructor also doesnt need the command and cwd parameters, as the class should always be instantiated
+with the info command output
+
+- a useful and important feature is being able to get `pixi info` without a manifest path to get the default info like
+platform 
+*/
+
+
 export class Pixi {
 	// save the output of the pixi info command
 	public pixiInfo!: PixiInfo | undefined;
