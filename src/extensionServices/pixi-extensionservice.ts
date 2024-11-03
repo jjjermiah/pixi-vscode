@@ -65,8 +65,7 @@ export class PixiExtensionService {
 
 		// TODO clean this section up. This is a workaround to check if the init worked
 		if (commandResults) {
-			// sleep for 1 seconds to allow the manifest file to be created
-
+			console.log("command results: " + commandResults);
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			if (pixiProject.updateWorkspaceFolder) {
 				this.vse.openFolderInCurrentWindow(pixiProject.projectDir.fsPath);
@@ -242,7 +241,7 @@ export class PixiExtensionService {
 		if (!fs.existsSync(selectedPythonPath)) {
 			notify.error(
 				`Python interpreter path does not exist: ${selectedPythonPath}` +
-					`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+				`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
 			);
 			return;
 		}
