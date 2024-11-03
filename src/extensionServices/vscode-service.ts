@@ -137,6 +137,9 @@ export class VSCodeExtensionService {
 			});
 			terminal.show();
 			terminal.sendText(command);
+			// sleep for 1
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			terminal.sendText("exit");
 			return true;
 		}
 
