@@ -9,3 +9,4 @@ cov/
 *.egg-info
 
 .DS_Store
+.yarn/install-state.gz

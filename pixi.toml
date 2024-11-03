@@ -1,0 +1,13 @@
+[project]
+authors = ["Jermiah Joseph <jermiahjoseph98@gmail.com>"]
+channels = ["conda-forge"]
+description = "Add a short description here"
+name = "pixi-vscode"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+nodejs = ">=22.9.0,<22.10"
+yarn = ">=4.5.1,<5"
