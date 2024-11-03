@@ -12,15 +12,58 @@ interface PixiTaskDefinition extends vscode.TaskDefinition {
 	task: string;
 
 	/**
-	 * The rake file containing the task
+	 * Possibly defined description of the task
 	 */
-	file?: string;
+	description?: string;
+
+	/**
+	 * The defined command to run the task
+	 */
+	cmd: string;
 }
 
-export class PixiTaskProvider implements vscode.TaskProvider {
-	private pixiPromise: Thenable<vscode.Task[]> | undefined = undefined;
+export interface TaskInfo {
+	environment: string;
+	tasks: Task[];
+}
 
+export interface Task {
+	name: string;
+	cmd: string;
+	depends_on: string[];
+	description: null;
+	cwd: null;
+	env: null;
+	clean_env: boolean;
+}
+
+
+// let PixiPromise: Thenable<vscode.Task[]> | undefined = undefined;
+export class PixiTaskProvider implements vscode.TaskProvider {
 	static TaskType = "Pixi";
+	private PixiPromise: Thenable<vscode.Task[]> | undefined = undefined;
+	private PixiInfo: Promise<PixiInfo | undefined>;
+
+	constructor() {
+		this.PixiInfo = this.getPixiInfo();
+		this.PixiInfo.then(info => {
+			if (info) {
+				console.log(info.project_info?.manifest_path);
+			} else {
+				console.error("Failed to retrieve PixiInfo");
+			}
+		});
+		this.PixiInfo.then(async info => {
+			const manifestPath = info?.project_info?.manifest_path;
+
+			const fileWatcher = vscode.workspace.createFileSystemWatcher(manifestPath || '');
+			fileWatcher.onDidChange(() => this.PixiPromise = this.getTasks());
+			fileWatcher.onDidCreate(() => this.PixiPromise = this.getTasks());
+			fileWatcher.onDidDelete(() => this.PixiPromise = this.getTasks());
+		});
+
+		this.PixiPromise = this.getTasks();
+	}
 
 	public async getPixiInfo(
 		manifestPath?: string
@@ -38,104 +81,85 @@ export class PixiTaskProvider implements vscode.TaskProvider {
 		return info;
 	}
 
+
 	provideTasks(
 		token: vscode.CancellationToken
 	): vscode.ProviderResult<vscode.Task[]> {
-		return this.getTasks();
+		if (!this.PixiPromise) {
+			this.PixiPromise = this.getTasks();
+		}
+		return this.PixiPromise;
 	}
 
 	public async getTasks(): Promise<vscode.Task[]> {
 		const tasks: vscode.Task[] = [];
-		// if (!this.pixiPromise) {
-		// console.log("Pixi Promise is not defined");
 		const workspaceFolders = vscode.workspace.workspaceFolders;
 		if (!workspaceFolders || workspaceFolders.length === 0) {
 			console.log("No workspace folders");
 			return tasks;
 		}
-		for (const workspaceFolder of workspaceFolders) {
-			const folderString = workspaceFolder.uri.fsPath;
-			if (!folderString) {
-				console.log("No folder string");
-				continue;
+
+		const task_list = this.getPixiTaskInfo().then((info) => {
+			if (!info) {
+				console.error("Failed to retrieve PixiInfo");
+				return [];
 			}
-			// wait for the pixi info to be retrieved
-			const task_list = this.getPixiInfo().then((info) => {
-				if (!info) {
-					console.error("Failed to retrieve PixiInfo");
-					3;
-					return [];
-				}
-				const manifestPath = info?.project_info?.manifest_path;
-				const temp_task_list: vscode.Task[] = [];
-				info.environments_info.forEach((env) => {
-					for (const taskName_temp of env.tasks) {
-						const taskName = `${taskName_temp} in *${env.name}*`;
-						const temp_task = new vscode.Task(
-							{
-								type: "Pixi",
-								task: taskName,
-							},
-							workspaceFolder,
-							taskName,
-							"Pixi",
-							new vscode.ShellExecution(`pixi run ${taskName_temp}`)
-						);
-						if ("build" === taskName) {
-							temp_task.group = vscode.TaskGroup.Build;
-						}
-						if ("test" === taskName) {
-							temp_task.group = vscode.TaskGroup.Test;
-						}
-						if ("ruff" === taskName) {
-							temp_task.group = vscode.TaskGroup.Test;
-						}
-						temp_task.detail = `$(terminal) ${taskName}`;
-						temp_task.source = "Whatever";
 
-						temp_task_list.push(temp_task);
-						const numtasks = temp_task_list.length;
+			info.forEach((env) => {
+				env.tasks.forEach((task) => {
+					const task_def: vscode.TaskDefinition = {
+						type: "Pixi",
+						task: task.name,
+						description: task.description,
+						cmd: task.cmd,
+					};
+
+					const temp_task = new vscode.Task(
+						task_def,
+						workspaceFolders[0],
+						task.name,
+						"Pixi",
+						new vscode.ShellExecution(`pixi run --environment ${env.environment} ${task.name}`)
+					);
+
+					// if task has a description, add it to the detail, if not use the cmd
+					if (task.description) {
+						temp_task.detail = `$(info) ${task.description}; $(terminal) ${task.cmd}`;
+					} else {
+						temp_task.detail = `$(terminal) ${task.cmd}`;
 					}
+					temp_task.source = `(${env.environment})`;
+
+					if (task.name.toLowerCase().startsWith("test")) {
+						temp_task.group = vscode.TaskGroup.Test;
+					}
+					if (task.name.toLowerCase().startsWith("build")) {
+						temp_task.group = vscode.TaskGroup.Build;
+					}
+					tasks.push(temp_task);
 				});
-				console.log(`Found ${temp_task_list.length} tasks`);
-				return temp_task_list;
 			});
-
-			// console.log(`found ${task_list.length} tasks`);
-			// add the tasks to the list
-			return task_list;
-		}
-
-		// combine the task lists
-
+		});
 		return tasks;
-		// } else {
-		// 	console.log("Pixi Promise is defined");
-		// }
 	}
 
-	// resolveTask(
-	// 	_task: vscode.Task,
-	// 	token: vscode.CancellationToken
-	// ): vscode.ProviderResult<vscode.Task> {
+	public async getPixiTaskInfo(
+		manifestPath?: string
+	): Promise<TaskInfo[] | undefined> {
+		const info = await execShellWithTimeout(
+			`${PixiCommand.tool} task list --json`,
+			5000,
+			vscode.workspace.workspaceFolders?.[0].uri.fsPath || process.cwd()
+		)
+			.then((output) => JSON.parse(output) as TaskInfo[])
+			.catch((error) => {
+				return undefined;
+			});
+		return info;
+	}
 
-	// 	return task;
-	// }
+
 	public resolveTask(_task: vscode.Task): vscode.Task | undefined {
-		const task = _task.definition.task;
-		// A Rake task consists of a task and an optional file as specified in RakeTaskDefinition
-		// Make sure that this looks like a Rake task by checking that there is a task.
-		if (task) {
-			// resolveTask requires that the same definition object be used.
-			const definition: PixiTaskDefinition = <any>_task.definition;
-			return new vscode.Task(
-				definition,
-				_task.scope ?? vscode.TaskScope.Workspace,
-				definition.task,
-				"Pixi",
-				new vscode.ShellExecution(`pixi run ${definition.task}`)
-			);
-		}
-		return undefined;
+		return _task;
 	}
 }

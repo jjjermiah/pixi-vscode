@@ -27,7 +27,7 @@ export enum PixiProjectType {
 
 export enum PixiCommand {
 	// Maybe find a way to locate the pixi binary or implement for a future option of asking user to locate it
-	tool = "pixi",
+	tool = "/Users/bhklab/Documents/GitHub/pixi/target-pixi/release/pixi",
 
 	// Pixi commands
 	init = "init",
