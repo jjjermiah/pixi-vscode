@@ -51,32 +51,32 @@ jobs:
                   yarn install
                   yarn lint
 
-    release:
-        name: Release
-        runs-on: ubuntu-latest
-        # if: ${{ (github.ref == 'refs/heads/main') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name)) }}
-        if: ${{ (github.ref == 'refs/heads/main') }}
+    # release:
+    #     name: Release
+    #     runs-on: ubuntu-latest
+    #     # if: ${{ (github.ref == 'refs/heads/main') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name)) }}
+    #     if: ${{ (github.ref == 'refs/heads/main') }}
 
-        permissions:
-            contents: write
-            packages: write
-            actions: write
+    #     permissions:
+    #         contents: write
+    #         packages: write
+    #         actions: write
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    #     steps:
+    #         - name: Checkout repository
+    #           uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 20
-                  cache: "yarn"
+    #         - name: Setup Node.js
+    #           uses: actions/setup-node@v3
+    #           with:
+    #               node-version: 20
+    #               cache: "yarn"
 
-            - name: Install dependencies
-              run: yarn
+    #         - name: Install dependencies
+    #           run: yarn
 
-            - name: Run semantic-release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
-              run: npx semantic-release
+    #         - name: Run semantic-release
+    #           env:
+    #               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #               VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+    #           run: npx semantic-release

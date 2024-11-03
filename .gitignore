@@ -8,3 +8,4 @@ cov/
 .pixi
 *.egg-info
 
+.yarn/install-state.gz
