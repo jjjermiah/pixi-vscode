@@ -2,91 +2,60 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { info, warn, error } from "./common/logging";
-import { Pixi } from "./environmentManagers/pixi";
-import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
-import { PypiService } from "./pypi/pypi-service";
-import { PypiClient } from "./pypi/pypi-client";
+import { info, warn, error, } from "./common/notification";
+import { registerLogger, traceError, traceLog, traceVerbose } from './common/logging';
+import { getWorkspaceFiles } from "./common/filesystem";
+import { EXTENSION_NAME } from "./common/constants";
+import {
+  getWorkspaceFolders,
+  getConfiguration,
+  getWorkspaceFolder,
+  createOutputChannel,
+} from "./common/vscode";
+import { all } from "axios";
+
+const SEARCHDEPTH = 3;
+
 const Cache = require("vscode-cache");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	const cache = new Cache(context);
-	const pypiService = new PypiService(
-		context.globalStorageUri,
-		PypiClient.default()
-	);
-	let disposable = vscode.commands.registerCommand(
-		"pixi-vscode.helloWorld",
-		() => {
-			info("Hello World from pixi-vscode!");
-		}
-	);
 
-	context.subscriptions.push(disposable);
 
-	const pxe = new PixiExtensionService(cache, pypiService);
+  // Create a new output channel for the extension
+  const outputChannel = createOutputChannel(EXTENSION_NAME);
+  context.subscriptions.push(outputChannel, registerLogger(outputChannel));
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"pixi-vscode.init",
-			async (uri: vscode.Uri) => {
-				await pxe.init(uri);
-			}
-		)
-	);
+  let workspaceFolders = getWorkspaceFolders();
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"pixi-vscode.addChannels",
-			async (uri: vscode.Uri) => {
-				await pxe.addChannels(uri);
-			}
-		)
-	);
+  let allPixiWorkspaceFolders: string[] = [];
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"pixi-vscode.addPackages",
-			async (uri: vscode.Uri) => {
-				await pxe.addPackages(uri);
-			}
-		)
-	);
+  workspaceFolders.forEach(folder => {
+    allPixiWorkspaceFolders.push(...getWorkspaceFiles(folder, SEARCHDEPTH));
+  });
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"pixi-vscode.addPyPiPackages",
-			async (uri: vscode.Uri) => {
-				await pxe.addPyPiPackages(uri);
-			}
-		)
-	);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand("pixi-vscode.clearCache", async () => {
-			cache.flush();
-		})
-	);
+  traceLog("Pixi workspace folders:", allPixiWorkspaceFolders);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"pixi-vscode.setPythonInterpreter",
-			async (uri: vscode.Uri) => {
-				await pxe.setPythonInterpreter(uri);
-			}
-		)
-	);
+  // Register a command handler
+  const disposable = vscode.commands.registerCommand("pixi-vscode.helloWorld", () => {
+    outputChannel.appendLine("Hello, World!");
+  });
+  context.subscriptions.push(disposable);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"pixi-vscode.activateEnvironmentTerminal",
-			async (uri: vscode.Uri) => {
-				await pxe.activateEnvironmentTerminal(uri);
-			}
-		)
-	);
+  // Register a command handler
+  const disposable2 = vscode.commands.registerCommand("pixi-vscode.logs", () => {
+    info("Hello, World!");
+    warn("Hello, World warning!");
+    error("Hello, World error!");
+    traceLog("Hello, World log!");
+    traceVerbose("Hello, World verbose!");
+    traceError("Hello, World error!");
+  });
+  context.subscriptions.push(disposable2);
+
+
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

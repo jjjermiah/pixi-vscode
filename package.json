@@ -25,81 +25,30 @@
     "Other"
   ],
   "preview": true,
-  "activationEvents": [],
+  "activationEvents": [
+    "workspaceContains:**/pyproject.toml",
+    "workspaceContains:**/pixi.toml"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "pixi-vscode.init",
-        "title": "Pixi: Init"
-      },
-      {
-        "command": "pixi-vscode.addPackages",
-        "title": "Pixi: Add Packages"
-      },
-      {
-        "command": "pixi-vscode.addChannels",
-        "title": "Pixi: Add Channels"
-      },
-      {
-        "command": "pixi-vscode.addPyPiPackages",
-        "title": "Pixi: Add PyPi Packages"
-      },
-      {
-        "command": "pixi-vscode.clearCache",
-        "title": "Pixi: Clear Extension Cache"
-      },
-      {
-        "command": "pixi-vscode.setPythonInterpreter",
-        "title": "Pixi: Set Python Interpreter"
-      },
-      {
-        "command": "pixi-vscode.activateEnvironmentTerminal",
-        "title": "Pixi: Activate Environment in new Terminal"
-      }
-    ],
-    "menus": {
-      "explorer/context": [
-        {
-          "command": "pixi-vscode.init",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        },
-        {
-          "command": "pixi-vscode.addPackages",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        },
-        {
-          "command": "pixi-vscode.addPyPiPackages",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        },
-        {
-          "command": "pixi-vscode.addChannels",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        }
-      ]
-    },
     "configuration": {
       "title": "Pixi",
       "properties": {
-        "pixi-vscode.defaultProjectType": {
+        "pixi-vscode.prefixAPIKey": {
+          "type": "string",
+          "default": "",
+          "description": "The prefix API key"
+        },
+        "pixi-vscode.defaults.defaultProjectType": {
           "type": "string",
           "default": "pixi",
           "enum": [
             "pixi",
             "pyproject"
           ],
-          "description": "The default type of project to create"
+          "description": "The default type of project to create when initializing a new Pixi project"
         },
-        "pixi-vscode.prefixAPIKey": {
-          "type": "string",
-          "default": "",
-          "description": "The prefix API key"
-        },
-        "pixi-vscode.defaultChannels": {
+        "pixi-vscode.defaults.defaultChannels": {
           "description": "The default channels to use when creating a new project",
           "type": "array",
           "scope": "resource",
@@ -110,7 +59,7 @@
             "conda-forge"
           ]
         },
-        "pixi-vscode.defaultPlatforms": {
+        "pixi-vscode.defaults.defaultPlatforms": {
           "description": "The default platforms to use when creating a new project",
           "type": "array",
           "scope": "resource",
@@ -121,13 +70,22 @@
             "osx-64",
             "osx-arm64"
           ]
+        },
+        "pixi-vscode.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "The path to the Pixi executable"
         }
       }
     },
-    "viewsWelcome": [
+    "commands": [
       {
-        "view": "workbench.explorer.emptyView",
-        "contents": "You can initialize a new Pixi Project with\n[New Pixi Project](command:pixi-vscode.init)\nChoose the folder to create a new Pixi Project in."
+        "command": "pixi-vscode.helloWorld",
+        "title": "Pixi: Init"
+      },
+      {
+        "command": "pixi-vscode.logs",
+        "title": "Pixi: Logs"
       }
     ]
   },

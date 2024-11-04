@@ -1,23 +1,61 @@
-import * as vscode from "vscode";
-// import { EXTENSION_NAME } from './constants.js';
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// https://github.com/microsoft/vscode-isort/blob/19c3556909612f515e3f933d4498dd1d1e63babe/src/common/logging.ts
 
-// verbosity.ts
-// helper functions to control the verbosity of the output
-// simplifying functions instead of using vscode.window...
-export const EXTENSION_NAME = "pixi-vscode";
+import * as util from 'util';
+import { Disposable, LogOutputChannel } from 'vscode';
 
-export function formatMessage(message: string): string {
-	return `${EXTENSION_NAME}: ${message}`;
+type Arguments = unknown[];
+class OutputChannelLogger {
+	constructor(private readonly channel: LogOutputChannel) { }
+
+	public traceLog(...data: Arguments): void {
+		this.channel.appendLine(util.format(...data));
+	}
+
+	public traceError(...data: Arguments): void {
+		this.channel.error(util.format(...data));
+	}
+
+	public traceWarn(...data: Arguments): void {
+		this.channel.warn(util.format(...data));
+	}
+
+	public traceInfo(...data: Arguments): void {
+		this.channel.info(util.format(...data));
+	}
+
+	public traceVerbose(...data: Arguments): void {
+		this.channel.debug(util.format(...data));
+	}
 }
 
-export function info(message: string): void {
-	vscode.window.showInformationMessage(formatMessage(message));
+let channel: OutputChannelLogger | undefined;
+export function registerLogger(logChannel: LogOutputChannel): Disposable {
+	channel = new OutputChannelLogger(logChannel);
+	return {
+		dispose: () => {
+			channel = undefined;
+		},
+	};
 }
 
-export function warn(message: string): void {
-	vscode.window.showWarningMessage(formatMessage(message));
+export function traceLog(...args: Arguments): void {
+	channel?.traceLog(...args);
 }
 
-export function error(message: string): void {
-	vscode.window.showErrorMessage(formatMessage(message));
+export function traceError(...args: Arguments): void {
+	channel?.traceError(...args);
+}
+
+export function traceWarn(...args: Arguments): void {
+	channel?.traceWarn(...args);
+}
+
+export function traceInfo(...args: Arguments): void {
+	channel?.traceInfo(...args);
+}
+
+export function traceVerbose(...args: Arguments): void {
+	channel?.traceVerbose(...args);
 }
