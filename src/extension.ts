@@ -45,14 +45,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
   let pixi_projects = await findPixiProjects(SEARCHDEPTH);
 
+  const EMPTY_WORKSPACE = pixi_projects.length === 0;
+
+  info(`Found ${pixi_projects.length} pixi projects in workspace`);
+
   traceLog(`Num pixi projects: ${pixi_projects.length}`);
+
   pixi_projects.forEach((pixi) => {
-    let name = pixi.projectName();
+    console.log(pixi.pixiInfo);
 
-    traceLog(`Pixi Project Name: ${name}`);
 
-    let envNames = pixi.EnvironmentNames();
-    traceLog(`Environment Names: ${envNames}`);
   });
 
   // Register a command handler
@@ -73,6 +75,7 @@ export async function activate(context: vscode.ExtensionContext) {
       traceError("Hello, World error!");
     })
   );
+
 }
 
 // This method is called when your extension is deactivated

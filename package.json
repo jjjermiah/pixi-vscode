@@ -81,11 +81,15 @@
     "commands": [
       {
         "command": "pixi-vscode.helloWorld",
-        "title": "Pixi: Init"
+        "title": "Pixi: Hello World"
       },
       {
         "command": "pixi-vscode.logs",
         "title": "Pixi: Logs"
+      },
+      {
+        "command": "pixi-vscode.init",
+        "title": "Pixi: Init"
       }
     ]
   },
