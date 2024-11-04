@@ -11,9 +11,9 @@ import {
   traceVerbose,
   traceInfo,
 } from "../common/logging";
-import { trace } from "console";
 import { PixiToolPath } from "../config";
-interface PixiTaskDefinition extends vscode.TaskDefinition {
+import { getWorkspaceFolder } from "../common/vscode";
+export interface PixiTaskDefinition extends vscode.TaskDefinition {
   /**
    * The task name
    */
@@ -66,7 +66,6 @@ export class PixiTaskProvider implements vscode.TaskProvider {
     }
 
     const allTaskDefinitions: vscode.TaskDefinition[] = [];
-    traceLog(`TaskProvider: Num pixi projects: ${this.pixiProjects.length}`);
 
     const taskPromises = this.pixiProjects.map(async (pixi) => {
       const projectName = pixi.projectName();
@@ -88,19 +87,41 @@ export class PixiTaskProvider implements vscode.TaskProvider {
             project: projectName,
             manifestPath: pixi.manifestPath,
           };
-          console.log(task);
           allTaskDefinitions.push(task);
         });
       });
     });
 
     await Promise.all(taskPromises);
-    console.log(allTaskDefinitions);
 
-    allTaskDefinitions.forEach((taskDef) => {
+    const taskDefPromises = allTaskDefinitions.map(async (taskDef) => {
+      // create uri from manifestPath
+      // if manifestPath is not a uri, create a uri from it
+      // if manifestPath is a uri, use it as is
+      const manifestUri = vscode.Uri.parse(taskDef.manifestPath);
+      if (manifestUri.scheme !== "file") {
+        traceError(
+          `TaskProvider: Manifest path is not a file: ${taskDef.manifestPath}`
+        );
+        return;
+      }
+      if (!manifestUri) {
+        traceError(
+          `TaskProvider: Manifest path is not a file: ${taskDef.manifestPath}`
+        );
+        return;
+      }
+      let wsf = await getWorkspaceFolder(manifestUri);
+      if (!wsf) {
+        traceError(
+          `TaskProvider: WorkspaceFolder not found for manifest path: ${taskDef.manifestPath}`
+        );
+        return;
+      }
+
       let task = new vscode.Task(
         taskDef,
-        workspaceFolders[0] ?? vscode.TaskScope.Workspace,
+        wsf,
         taskDef.task,
         "Pixi",
         new vscode.ShellExecution(
@@ -114,11 +135,14 @@ export class PixiTaskProvider implements vscode.TaskProvider {
       } else {
         task.detail = `$(terminal) ${taskDef.cmd}`;
       }
+      // task.source = `(${taskDef.project}::${taskDef.environment})`;
       task.source = `(${taskDef.environment})`;
 
       allTaks.push(task);
     });
-    traceLog(`TaskProvider: Num tasks: ${allTaks.length}`);
+
+    await Promise.all(taskDefPromises);
+    traceLog(`TaskProvider: Num tasks: ${allTaks.length} from ${allTaskDefinitions.length}`);
     return allTaks;
   }
 

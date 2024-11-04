@@ -9,34 +9,14 @@ import {
   traceLog,
   traceVerbose,
 } from "./common/logging";
-import { getWorkspaceFiles } from "./common/filesystem";
+import { getWorkspaceFiles, findPixiProjects } from "./common/filesystem";
 import { EXTENSION_NAME } from "./common/constants";
-import { getWorkspaceFolders, createOutputChannel } from "./common/vscode";
-import { Pixi } from "./managers/pixi";
+import { createOutputChannel } from "./common/vscode";
 import { PixiTaskProvider } from "./taskProvider/pixiTaskProvider";
-
-const SEARCHDEPTH = 3;
-
-async function findPixiProjects(searchDepth: number): Promise<Pixi[]> {
-  let pixiProjects: Pixi[] = [];
-  const workspaceFolders = getWorkspaceFolders();
-  const pixiPromises = workspaceFolders.map(async (folder) => {
-    const files = await getWorkspaceFiles(folder, searchDepth);
-    const pixiInfoPromises = files.map(async (file) => {
-      const pixi = new Pixi(file);
-      const info = await pixi.getPixiInfo();
-      if (info && info.project_info) {
-        pixiProjects.push(pixi);
-      }
-    });
-    await Promise.all(pixiInfoPromises);
-  });
-  await Promise.all(pixiPromises);
-  return pixiProjects;
-}
+import { PixiTaskTreeProvider } from "./treeProvider/task_tree";
+import { PixiSearchDepth } from "./config";
 
 const Cache = require("vscode-cache");
-
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
@@ -44,7 +24,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const outputChannel = createOutputChannel(EXTENSION_NAME);
   context.subscriptions.push(outputChannel, registerLogger(outputChannel));
 
-  let pixi_projects = await findPixiProjects(SEARCHDEPTH);
+  let pixi_projects = await findPixiProjects(PixiSearchDepth);
 
   const EMPTY_WORKSPACE = pixi_projects.length === 0;
 
@@ -56,6 +36,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.tasks.registerTaskProvider("Pixi", pixiTaskProvider)
+  );
+
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(
+      "pixi_explorer",
+      new PixiTaskTreeProvider()
+    )
   );
 
   // Register a command handler

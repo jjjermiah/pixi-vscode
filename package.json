@@ -31,53 +31,79 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "configuration": {
-      "title": "Pixi",
-      "properties": {
-        "pixi-vscode.prefixAPIKey": {
-          "type": "string",
-          "default": "",
-          "description": "The prefix API key"
-        },
-        "pixi-vscode.defaults.defaultProjectType": {
-          "type": "string",
-          "default": "pixi",
-          "enum": [
-            "pixi",
-            "pyproject"
-          ],
-          "description": "The default type of project to create when initializing a new Pixi project"
-        },
-        "pixi-vscode.defaults.defaultChannels": {
-          "description": "The default channels to use when creating a new project",
-          "type": "array",
-          "scope": "resource",
-          "items": {
-            "type": "string"
+    "configuration": [
+      {
+        "title": "Pixi Defaults",
+        "properties": {
+          "pixi-vscode.prefixAPIKey": {
+            "type": "string",
+            "default": "",
+            "description": "The prefix API key"
           },
-          "default": [
-            "conda-forge"
-          ]
-        },
-        "pixi-vscode.defaults.defaultPlatforms": {
-          "description": "The default platforms to use when creating a new project",
-          "type": "array",
-          "scope": "resource",
-          "items": {
-            "type": "string"
+          "pixi-vscode.defaults.defaultProjectType": {
+            "type": "string",
+            "default": "pixi",
+            "enum": [
+              "pixi",
+              "pyproject"
+            ],
+            "description": "The default type of project to create when initializing a new Pixi project"
           },
-          "default": [
-            "osx-64",
-            "osx-arm64"
-          ]
-        },
-        "pixi-vscode.executablePath": {
-          "type": "string",
-          "default": "",
-          "description": "The path to the Pixi executable"
+          "pixi-vscode.defaults.defaultChannels": {
+            "description": "The default channels to use when creating a new project",
+            "type": "array",
+            "scope": "resource",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "conda-forge"
+            ]
+          },
+          "pixi-vscode.defaults.defaultPlatforms": {
+            "description": "The default platforms to use when creating a new project",
+            "type": "array",
+            "scope": "resource",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "osx-64",
+              "osx-arm64"
+            ]
+          }
+        }
+      },
+      {
+        "title": "Pixi Projects",
+        "properties": {
+          "pixi-vscode.executablePath": {
+            "type": "string",
+            "default": "",
+            "description": "The path to the Pixi executable"
+          },
+          "pixi-vscode.projects.searchDepth": {
+            "type": "number",
+            "default": 3,
+            "description": "The depth to search for Pixi projects"
+          },
+          "pixi-vscode.projects.gitignore": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to use .gitignore files to ignore files from Pixi projects, useful to ignore local envs (i.e .pixi)"
+          },
+          "pixi-vscode.projects.ignore": {
+            "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
+            "type": "array",
+            "default": [],
+            "scope": "resource",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
-    },
+    ],
     "commands": [
       {
         "command": "pixi-vscode.helloWorld",
@@ -91,7 +117,62 @@
         "command": "pixi-vscode.init",
         "title": "Pixi: Init"
       }
-    ]
+    ],
+    "taskDefinitions": [
+      {
+        "type": "Pixi",
+        "required": [
+          "task",
+          "cmd",
+          "environment",
+          "project",
+          "manifestPath"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "The Pixi task to customize"
+          },
+          "description": {
+            "type": "string",
+            "description": "Possibly defined description of the task"
+          },
+          "cmd": {
+            "type": "string",
+            "description": "The defined command to run the task"
+          },
+          "environment": {
+            "type": "string",
+            "description": "The environment the task is associated with"
+          },
+          "project": {
+            "type": "string",
+            "description": "Project associated with the task"
+          },
+          "manifestPath": {
+            "type": "string",
+            "description": "Manifest path associated with the task"
+          }
+        }
+      }
+    ],
+    "views": {
+      "pixi": [
+        {
+          "id": "pixi_explorer",
+          "name": "Pixi"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pixi",
+          "title": "Pixi",
+          "icon": "assets/images/VSCodePrefix-Dev-Logo.png"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",
