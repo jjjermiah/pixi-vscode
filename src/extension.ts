@@ -13,6 +13,7 @@ import { getWorkspaceFiles } from "./common/filesystem";
 import { EXTENSION_NAME } from "./common/constants";
 import { getWorkspaceFolders, createOutputChannel } from "./common/vscode";
 import { Pixi } from "./managers/pixi";
+import { PixiTaskProvider } from "./taskProvider/pixiTaskProvider";
 
 const SEARCHDEPTH = 3;
 
@@ -51,11 +52,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   traceLog(`Num pixi projects: ${pixi_projects.length}`);
 
-  pixi_projects.forEach((pixi) => {
-    console.log(pixi.pixiInfo);
+  let pixiTaskProvider = new PixiTaskProvider(pixi_projects);
 
-
-  });
+  context.subscriptions.push(
+    vscode.tasks.registerTaskProvider("Pixi", pixiTaskProvider)
+  );
 
   // Register a command handler
   context.subscriptions.push(
@@ -75,7 +76,6 @@ export async function activate(context: vscode.ExtensionContext) {
       traceError("Hello, World error!");
     })
   );
-
 }
 
 // This method is called when your extension is deactivated

@@ -7,7 +7,7 @@ import { PixiToolPath } from "../config";
 export class Pixi {
   // save the output of the pixi info command
   public pixiInfo!: PixiInfo;
-  public pixiTaskInfo!: PixiTaskEnvironments[];
+  public pixiTaskInfo: PixiTaskEnvironments[] = [];
   public manifestPath: string;
 
   constructor(manifestPath: string) {
@@ -42,7 +42,7 @@ export class Pixi {
   }
 
   public async getPixiTaskEnvironments(): Promise<PixiTaskEnvironments[]> {
-    if (this.pixiTaskInfo) {
+    if (this.pixiTaskInfo.length > 0) {
       return this.pixiTaskInfo;
     }
     // it will defiinitely return a valu,e or `No tasks found` if no tasks are found
