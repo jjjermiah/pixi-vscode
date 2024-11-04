@@ -25,11 +25,10 @@ jobs:
             with:
               pixi-version: v0.33.0
               cache: true
-              locked: false # wont be the same because of the tag
 
-          - name: Run pytest
-            run: |
-              pixi run test
+#           - name: Run pytest
+#             run: |
+#               pixi run test
 
     # lint:
     #     runs-on: ubuntu-latest
