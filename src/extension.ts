@@ -36,7 +36,6 @@ async function findPixiProjects(searchDepth: number): Promise<Pixi[]> {
 
 const Cache = require("vscode-cache");
 
-
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
@@ -48,9 +47,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   traceLog(`Num pixi projects: ${pixi_projects.length}`);
   pixi_projects.forEach((pixi) => {
-    pixi.getPixiInfo().then((info) => {
-      traceLog(`Pixi Project Name: ${info.project_info.name}`);
-    });
+    let name = pixi.projectName();
+
+    traceLog(`Pixi Project Name: ${name}`);
+
+    let envNames = pixi.EnvironmentNames();
+    traceLog(`Environment Names: ${envNames}`);
   });
 
   // Register a command handler
