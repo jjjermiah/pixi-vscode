@@ -5,4 +5,5 @@ export function getPixiExecutablePath(): string {
     const executablePath = config.get<string>('executablePath');
     return executablePath || 'pixi';
 }
+
 export const PixiToolPath = getPixiExecutablePath();

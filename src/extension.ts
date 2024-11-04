@@ -12,7 +12,9 @@ import {
   getWorkspaceFolder,
   createOutputChannel,
 } from "./common/vscode";
-import { all } from "axios";
+import { Pixi } from "./managers/pixi";
+import { trace } from "console";
+
 
 const SEARCHDEPTH = 3;
 
@@ -36,6 +38,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 
   traceLog("Pixi workspace folders:", allPixiWorkspaceFolders);
+
+  allPixiWorkspaceFolders.forEach(folder => {
+    const pixi = new Pixi(folder);
+    pixi.getPixiInfo(folder).then((info) => {
+      traceLog(`Pixi info for ${folder}:`, info);
+    });
+  });
 
   // Register a command handler
   const disposable = vscode.commands.registerCommand("pixi-vscode.helloWorld", () => {
