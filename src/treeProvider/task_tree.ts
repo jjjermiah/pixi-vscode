@@ -10,7 +10,8 @@ class PixiTask extends vscode.TreeItem {
     public readonly type: string,
     public readonly task?: vscode.Task,
     public readonly scope?: vscode.WorkspaceFolder,
-    public readonly project?: string
+    public readonly project?: string,
+    public iconPath?: vscode.ThemeIcon
   ) {
     super(label, state);
     this.description = description;
@@ -44,17 +45,18 @@ export class PixiTaskTreeProvider implements vscode.TreeDataProvider<PixiTask> {
   getChildren(element?: PixiTask): Promise<PixiTask[]> {
     if (!element) {
       return this.getTopLevelItems().then((scopes) =>
-        scopes.map(
-          (scope) =>
-            new PixiTask(
-              `Workspace Folder: ${scope.name}`,
-              vscode.TreeItemCollapsibleState.Expanded,
-              "", //scope.uri.toString(),
-              "workspaceFolder",
-              undefined,
-              scope
-            )
-        )
+        scopes.map((scope) => {
+          let task = new PixiTask(
+            `${scope.name}`,
+            vscode.TreeItemCollapsibleState.Expanded,
+            "", //scope.uri.toString(),
+            "workspaceFolder",
+            undefined,
+            scope
+          );
+          task.iconPath = new vscode.ThemeIcon("folder-library");
+          return task;
+        })
       );
     }
     if (this.allTasks.length === 0) {
@@ -70,78 +72,81 @@ export class PixiTaskTreeProvider implements vscode.TreeDataProvider<PixiTask> {
       return this.filterTasksByScope(element.scope!).then((tasks_in_scope) => {
         let unique_Projects = new Set<string>(
           tasks_in_scope.map((task) => task.definition.project)
+
         );
         return Array.from(unique_Projects).map(
           (project) =>
             new PixiTask(
               project,
-              vscode.TreeItemCollapsibleState.Expanded,
+              vscode.TreeItemCollapsibleState.Collapsed,
               "",
               "project",
               undefined,
-              element.scope!
+              element.scope!,
+              undefined,
+              new vscode.ThemeIcon("folder")
             )
         );
       });
     }
 
     if (element.type === "project") {
-      let all_envs = this.allTasks
-        .map((task: vscode.Task) => {
-          // console.log(task);
-          if (task.definition.project === element.label) {
-            return task.definition.environment;
-          }
-        });
-      let unique_envs = new Set<string>(
-        all_envs.map((env) => env)
-      );
+      let all_envs = this.allTasks.map((task: vscode.Task) => {
+        if (task.definition.project === element.label) {
+          return task.definition.environment;
+        }
+      });
+      let unique_envs = new Set<string>(all_envs.map((env) => env));
       return Promise.resolve(
         Array.from(unique_envs)
-        .filter((env) => env !== "" && env !== undefined)
-        .map(
-          (env) =>
-            new PixiTask(
-              env,
-              vscode.TreeItemCollapsibleState.Expanded,
-              "",
-              "environment",
-              undefined,
-              element.scope!,
-              element.label
-            )
-        )
+          .filter((env) => env !== "" && env !== undefined)
+          .map(
+            (env) =>
+              new PixiTask(
+                env,
+                vscode.TreeItemCollapsibleState.Collapsed,
+                "",
+                "environment",
+                undefined,
+                element.scope!,
+                element.label,
+                new vscode.ThemeIcon("runtime-extensions-editor-label-icon")
+              )
+          )
       );
     }
 
     if (element.type === "environment") {
       let all_tasks: vscode.Task[] = this.allTasks
         .map((task: vscode.Task) => {
-          if (task.definition.environment === element.label && task.definition.project === element.project) {
+          if (
+            task.definition.environment === element.label &&
+            task.definition.project === element.project
+          ) {
             return task;
           }
         })
         .filter((task): task is vscode.Task => task !== undefined);
       return Promise.resolve(
-        all_tasks.map(
-          (task) =>{
-            console.log(task);
-            if (task.definition.description === undefined || task.definition.description === "") {
-              task.definition.description = task.definition.cmd;
-            }
-
-            let pixitask =  new PixiTask(
-              task.definition.task,
-              vscode.TreeItemCollapsibleState.None,
-              task.definition.description,
-              "task",
-              task,
-              element.scope!
-            )
-            pixitask.tooltip = generateMarkdownString(task);
-            return pixitask;
+        all_tasks.map((task) => {
+          if (
+            task.definition.description === undefined ||
+            task.definition.description === ""
+          ) {
+            task.definition.description = task.definition.cmd;
           }
-        )
+
+          let pixitask = new PixiTask(
+            task.definition.task,
+            vscode.TreeItemCollapsibleState.None,
+            task.definition.description,
+            "task",
+            task,
+            element.scope!
+          );
+          pixitask.tooltip = generateMarkdownString(task);
+          return pixitask;
+        })
       );
     }
 
@@ -209,7 +214,6 @@ function getWorkspaceFolderFromManifestPath(
   return wsf;
 }
 
-
 function generateMarkdownString(task: vscode.Task): vscode.MarkdownString {
   let markdownString = `# **Task Name:** ${task.definition.task}\n\n`;
   markdownString += `**Description:** ${task.definition.description}\n\n`;
@@ -220,5 +224,4 @@ function generateMarkdownString(task: vscode.Task): vscode.MarkdownString {
 
   let convertedString = new vscode.MarkdownString(markdownString);
   return convertedString;
-
 }
