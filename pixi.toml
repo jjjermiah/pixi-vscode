@@ -10,7 +10,7 @@ version = "0.1.0"
 install = "yarn install"
 pretest = { cmd = "yarn run pretest", depends_on = ["install"] }
 test = {cmd = "yarn run test", depends_on = ["pretest"]}
-
+package = {cmd = "vsce package --no-yarn"}
 
 [dependencies]
 nodejs = ">=22.9.0,<22.10"

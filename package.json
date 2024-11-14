@@ -4,7 +4,7 @@
   "description": "Pixi support for Visual Studio Code to manage Pixi projects",
   "icon": "assets/images/VSCode-Pixi-Logo.png",
   "publisher": "jjjermiah",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "license": "MIT",
   "repository": {
     "type": "git",
