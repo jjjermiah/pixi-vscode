@@ -1,24 +1,24 @@
-# name: Release
+name: Release
 
-# on:
-#     push:
-#         branches: ["main", "development"]
+on:
+    push:
+        branches: ["main", "development"]
 
-# concurrency:
-#     group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-#     cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+    cancel-in-progress: true
 
-# jobs:
-#     test:
-#         runs-on: ${{ matrix.os }}
+jobs:
+    test:
+        runs-on: ${{ matrix.os }}
 
-#         strategy:
-#             matrix:
-#                 os: [ubuntu-latest, windows-latest, macos-latest]
-#                 node-version: [20]
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                node-version: [20]
 
-#         steps:
-#           - uses: actions/checkout@v4
+        steps:
+          - uses: actions/checkout@v4
 
 #           - name: Install Pixi
 #             uses: prefix-dev/setup-pixi@v0.8.1
