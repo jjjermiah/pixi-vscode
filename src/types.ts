@@ -1,5 +1,6 @@
 import { PixiPlatform } from "./enums";
 
+// OLD TYPES
 export interface PixiTaskInfo {
   environment: string;
   tasks: Task[];
@@ -14,6 +15,29 @@ export interface Task {
   env: null;
   clean_env: boolean;
 }
+// NEW TYPES
+export interface EnvFeatureTaskList {
+  environment: string;
+  features:    Feature[];
+}
+
+export interface Feature {
+  name:  string;
+  tasks: Task[];
+}
+
+export interface TaskInfo {
+  name:        string;
+  cmd:         null | string;
+  description: null | string;
+  depends_on:  string[];
+  cwd:         null;
+  env:         null;
+  clean_env:   boolean;
+  inputs:      string[] | null;
+  outputs:     string[] | null;
+}
+
 
 export interface PixiInfo {
   platform: string;
