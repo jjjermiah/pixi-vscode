@@ -25,7 +25,7 @@ class OutputChannelLogger {
 		this.channel.info(util.format(...data));
 	}
 
-	public traceVerbose(...data: Arguments): void {
+	public traceDebug(...data: Arguments): void {
 		this.channel.debug(util.format(...data));
 	}
 }
@@ -40,22 +40,22 @@ export function registerLogger(logChannel: LogOutputChannel): Disposable {
 	};
 }
 
-export function traceLog(...args: Arguments): void {
+export function log(...args: Arguments): void {
 	channel?.traceLog(...args);
 }
 
-export function traceError(...args: Arguments): void {
+export function error(...args: Arguments): void {
 	channel?.traceError(...args);
 }
 
-export function traceWarn(...args: Arguments): void {
+export function warn(...args: Arguments): void {
 	channel?.traceWarn(...args);
 }
 
-export function traceInfo(...args: Arguments): void {
+export function info(...args: Arguments): void {
 	channel?.traceInfo(...args);
 }
 
-export function traceVerbose(...args: Arguments): void {
-	channel?.traceVerbose(...args);
+export function debug(...args: Arguments): void {
+	channel?.traceDebug(...args);
 }

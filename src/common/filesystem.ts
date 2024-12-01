@@ -59,25 +59,46 @@ export function getWorkspaceFiles(
   const folderPath = workspaceFolder.uri.fsPath;
   
   let foundFiles =  searchFiles(folderPath, 0, depth, folderPath); 
-  log.traceLog(`Ignored ${totalIgnored} files`);
-  console.log(foundFiles);
+  log.info(`Ignored ${totalIgnored} files`);
   return foundFiles;
 }
 
 export async function findPixiProjects(searchDepth: number): Promise<Pixi[]> {
-  let pixiProjects: Pixi[] = [];
-  const workspaceFolders = getWorkspaceFolders();
-  const pixiPromises = workspaceFolders.map(async (folder) => {
-    const files = getWorkspaceFiles(folder, searchDepth);
-    const pixiInfoPromises = files.map(async (file) => {
-      const pixi = new Pixi(file);
-      const info = await pixi.getPixiInfo();
-      if (info && info.project_info) {
-        pixiProjects.push(pixi);
-      }
-    });
-    await Promise.all(pixiInfoPromises);
-  });
-  await Promise.all(pixiPromises);
-  return pixiProjects;
+	const workspaceFolders = getWorkspaceFolders();
+
+	// Process each workspace folder
+	const pixiProjects = await Promise.all(
+		workspaceFolders.map((folder) => findPixiProjectsInFolder(folder, searchDepth))
+	);
+
+	// Flatten the results from all folders
+	return pixiProjects.flat();
+}
+
+// Helper function to process one folder
+async function findPixiProjectsInFolder(folder: vscode.WorkspaceFolder, searchDepth: number): Promise<Pixi[]> {
+	const files = getWorkspaceFiles(folder, searchDepth);
+
+	// Process each file in the folder
+	const pixiProjects = await Promise.all(
+		files.map((file) => createPixiIfValid(file))
+	);
+
+	// Filter out undefined results (failed PixiInfo)
+	return pixiProjects.filter((pixi): pixi is Pixi => pixi !== undefined);
+}
+
+// Helper function to create a Pixi instance if valid
+async function createPixiIfValid(file: string): Promise<Pixi | undefined> {
+	try {
+		const pixi = new Pixi(file);
+		await pixi.getPixiInfo(); // Ensure PixiInfo is loaded
+		if (pixi.pixiInfo.project_info) {
+      await pixi.getPixiTaskEnvironments();
+      return pixi;
+		}
+	} catch (error) {
+		log.error(`Failed to get PixiInfo for ${file}`, error);
+	}
+	return undefined;
 }

@@ -19,7 +19,7 @@ function getPixiSearchDepth(): number {
   if (searchDepth && searchDepth > 0) {
     return searchDepth;
   } else {
-    log.traceError(`Invalid search depth: ${searchDepth}`);
+    log.warn(`Invalid search depth: ${searchDepth}`);
     notif.error(`Invalid search depth: ${searchDepth} using default of 3`);
     return 3;
   }
