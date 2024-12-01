@@ -1,18 +1,15 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { Pixi } from "../managers/pixi";
+
 import { PixiPlatform, PixiProjectType } from "../enums";
-import { PixiInfo } from "../types";
+import { EnvFeatureTaskList, Feature, TaskInfo } from "../types";
 import { execShellWithTimeout } from "../common/shell";
-import {
-  registerLogger,
-  traceError,
-  traceLog,
-  traceVerbose,
-  traceInfo,
-} from "../common/logging";
+import * as log from "../common/logging";
 import { PixiToolPath } from "../config";
 import { getWorkspaceFolder } from "../common/vscode";
+import { env } from "process";
+
 export interface PixiTaskDefinition extends vscode.TaskDefinition {
   /**
    * The task name
@@ -21,19 +18,26 @@ export interface PixiTaskDefinition extends vscode.TaskDefinition {
 
   /**
    * Possibly defined description of the task
+   *
+   * Extracted from the task info json
    */
   description?: string;
 
   /**
    * The defined command to run the task
    */
-  cmd: string;
+  cmd?: string;
 
   /**
    * The environment the task is associated with
-   * Duplicated tasks will probably have unique environments!
+   * Duplicated task names probably have different environments.
    */
   environment: string;
+
+  /**
+   * Feature name that task is defined under
+   */
+  feature: string;
 
   /**
    * Project associated with the task
@@ -44,109 +48,51 @@ export interface PixiTaskDefinition extends vscode.TaskDefinition {
    * Manifest path associated with the task
    */
   manifestPath: string;
+
+  /**
+   *  TaskInfo object for reference in the future
+   */
+  taskInfo: TaskInfo;
 }
 
-// let PixiPromise: Thenable<vscode.Task[]> | undefined = undefined;
-export class PixiTaskProvider implements vscode.TaskProvider {
-  private static pixiProjects: Pixi[];
+export async function getPixiTasks(project: Pixi): Promise<vscode.Task[]> {
+  let env_task_map: EnvFeatureTaskList[] = project.pixiTaskInfo;
 
-  constructor(private readonly pixiProjects: Pixi[]) {
-    this.pixiProjects = pixiProjects;
-  }
-
-  public async provideTasks(
-    token: vscode.CancellationToken
-  ): Promise<vscode.Task[]> {
-    const allTaks: vscode.Task[] = [];
-    // TODO: attach workspace Folder to the Pixi Projects instead of using the first one
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders.length === 0) {
-      traceError("No workspace folders found...");
-      return allTaks;
-    }
-
-    const allTaskDefinitions: vscode.TaskDefinition[] = [];
-
-    const taskPromises = this.pixiProjects.map(async (pixi) => {
-      const projectName = pixi.projectName();
-
-      const info = await pixi.getPixiTaskEnvironments();
-      if (!info) {
-        traceError(`Failed to retrieve PixiInfo for ${projectName}`);
-        return;
-      }
-
-      info.forEach((env) => {
-        env.tasks.forEach((taskinfo) => {
-          const task: PixiTaskDefinition = {
-            type: "Pixi",
-            task: taskinfo.name,
-            description: taskinfo.description ?? "",
-            cmd: taskinfo.cmd,
-            environment: env.environment,
-            project: projectName,
-            manifestPath: pixi.manifestPath,
-          };
-          allTaskDefinitions.push(task);
-        });
+  env_task_map.forEach((env) => {
+    env.features.forEach((feature) => {
+      feature.tasks.forEach((task) => {
+        // console.log(task);
       });
     });
+  });
 
-    await Promise.all(taskPromises);
+  let result: vscode.Task[] = [];
+  return result;
+}
 
-    const taskDefPromises = allTaskDefinitions.map(async (taskDef) => {
-      // create uri from manifestPath
-      // if manifestPath is not a uri, create a uri from it
-      // if manifestPath is a uri, use it as is
-      const manifestUri = vscode.Uri.parse(taskDef.manifestPath);
-      if (manifestUri.scheme !== "file") {
-        traceError(
-          `TaskProvider: Manifest path is not a file: ${taskDef.manifestPath}`
-        );
-        return;
-      }
-      if (!manifestUri) {
-        traceError(
-          `TaskProvider: Manifest path is not a file: ${taskDef.manifestPath}`
-        );
-        return;
-      }
-      let wsf = await getWorkspaceFolder(manifestUri);
-      if (!wsf) {
-        traceError(
-          `TaskProvider: WorkspaceFolder not found for manifest path: ${taskDef.manifestPath}`
-        );
-        return;
-      }
+async function buildTaskDefinition(
+  env_name: string,
+  feature_name: string,
+  task: TaskInfo,
+): Promise<PixiTaskDefinition> {
+  let taskDefinition: PixiTaskDefinition = {
+    type: "pixi",
+    task: task.name,
+    environment: env_name,
+    feature: feature_name,
+    project: "",
+    manifestPath: "",
+    taskInfo: task,
+  };
 
-      let task = new vscode.Task(
-        taskDef,
-        wsf,
-        taskDef.task,
-        "Pixi",
-        new vscode.ShellExecution(
-          `${PixiToolPath} run --manifest-path ${taskDef.manifestPath} --environment ${taskDef.environment} ${taskDef.task}`
-        )
-      );
-
-      // if task has a description, add it to the detail, if not use the cmd
-      if (taskDef.description) {
-        task.detail = `$(info) ${taskDef.description}; $(terminal) ${taskDef.cmd}`;
-      } else {
-        task.detail = `$(terminal) ${taskDef.cmd}`;
-      }
-      // task.source = `(${taskDef.project}::${taskDef.environment})`;
-      task.source = `(${taskDef.environment})`;
-
-      allTaks.push(task);
-    });
-
-    await Promise.all(taskDefPromises);
-    traceLog(`TaskProvider: Num tasks: ${allTaks.length} from ${allTaskDefinitions.length}`);
-    return allTaks;
+  // Alias tasks dont have an actual command, but rather depend on other tasks
+  if (task.cmd) {
+    taskDefinition.cmd = task.cmd;
   }
 
-  public resolveTask(_task: vscode.Task): vscode.Task | undefined {
-    return _task;
+  if (task.description) {
+    taskDefinition.description = task.description;
   }
+
+  return taskDefinition;
 }
