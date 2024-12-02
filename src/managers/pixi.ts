@@ -26,6 +26,14 @@ export class Pixi {
       }
     });
 
+    this.getPixiTaskEnvironments().then((result) => {
+      if (result && this.pixiTaskInfo.length > 0) {
+        log.info(`Pixi Task Environments initialized for ${this.projectName()} with ${this.pixiTaskInfo.length} tasks`);
+      } else {
+        log.warn('Failed to initialize Pixi Task Environments');
+      }
+    });
+
     const fileWatcher = vscode.workspace.createFileSystemWatcher(
       manifestPath || ""
     );
@@ -97,9 +105,12 @@ export class Pixi {
   }
 
 
-  public async getPixiTaskEnvironments(): Promise<EnvFeatureTaskList[]> {
-    if (this.pixiTaskInfo && this.pixiTaskInfo.length > 0) {
+  public async getPixiTaskEnvironments(force: boolean = false): Promise<EnvFeatureTaskList[]> {
+    if (!force && this.pixiTaskInfo && this.pixiTaskInfo.length > 0) {
       return this.pixiTaskInfo;
+    }
+    if(force){
+      log.debug("Forcing Pixi Task Environments refresh");
     }
     // it will defiinitely return a valu,e or `No tasks found` if no tasks are found
     let pixiTaskInfo = await execShellWithTimeout(

@@ -8,7 +8,7 @@ import * as log from "./common/logging";
 import { getWorkspaceFiles, findPixiProjects } from "./common/filesystem";
 import { EXTENSION_NAME } from "./common/constants";
 import { createOutputChannel } from "./common/vscode";
-import {getPixiTasks} from "./taskProvider/pixiTaskProvider";
+import {PixiTaskProvider} from "./taskProvider/pixiTaskProvider";
 // import { PixiTaskProvider } from "./taskProvider/pixiTaskProvider";
 // import { PixiTaskTreeProvider } from "./treeProvider/task_tree";
 import { PixiSearchDepth } from "./config";
@@ -30,11 +30,8 @@ export async function activate(context: vscode.ExtensionContext) {
   // Log the projects
   log.debug(`Extension Activation: Found ${pixi_projects.length} pixi projects:`, pixi_projects);
 
-  // let pixiTaskProvider = new PixiTaskProvider(pixi_projects);
-
-  // context.subscriptions.push(
-  //   vscode.tasks.registerTaskProvider("Pixi", pixiTaskProvider)
-  // );
+  let pixiTaskProvider = vscode.tasks.registerTaskProvider("Pixi", new PixiTaskProvider(pixi_projects));
+  context.subscriptions.push(pixiTaskProvider);
 
   // context.subscriptions.push(
   //   vscode.window.registerTreeDataProvider(
@@ -43,9 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
   //   )
   // );
 
-  pixi_projects.forEach(async (project) => {
-    let tasks = await getPixiTasks(project);
-  });
+
 
   // Register a command handler
   context.subscriptions.push(
