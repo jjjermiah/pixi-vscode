@@ -40,25 +40,6 @@ export async function activate(context: vscode.ExtensionContext) {
   //   )
   // );
 
-
-
-  // Register a command handler
-  context.subscriptions.push(
-    vscode.commands.registerCommand("pixi-vscode.helloWorld", () => {
-      outputChannel.appendLine("Hello, World!");
-    })
-  );
-
-  // Register a command handler
-  context.subscriptions.push(
-    vscode.commands.registerCommand("pixi-vscode.logs", () => {
-      log.log("Hello, World log!");
-      log.debug("Hello, World debug!");
-      log.info("Hello, World info!");
-      log.warn("Hello, World warn!");
-      log.error("Hello, World error!");
-    })
-  );
 }
 
 // This method is called when your extension is deactivated

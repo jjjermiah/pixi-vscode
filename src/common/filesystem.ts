@@ -58,8 +58,8 @@ export function getWorkspaceFiles(
 ): string[] {
   const folderPath = workspaceFolder.uri.fsPath;
   
-  let foundFiles =  searchFiles(folderPath, 0, depth, folderPath); 
-  log.info(`Ignored ${totalIgnored} files`);
+  let foundFiles = searchFiles(folderPath, 0, depth, folderPath); 
+  log.debug(`getWorkspaceFiles: Found ${foundFiles.length} files and ignored ${totalIgnored} files.`);
   return foundFiles;
 }
 

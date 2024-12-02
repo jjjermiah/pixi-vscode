@@ -87,6 +87,10 @@ export async function getPixiTasks(project: Pixi): Promise<vscode.Task[]> {
 
   // first, force the pixi to re-fetch the task info
   log.debug("Fetching Pixi tasks for", project.manifestPath);
+  if(!project.pixiInfo.project_info) {
+    await project.getPixiInfo();
+  }
+
   await project.getPixiTaskEnvironments(true);
 
 	// Iterate through environments, features, and tasks
@@ -213,7 +217,6 @@ const taskGroups: [string[], vscode.TaskGroup][] = [
 function createTaskDetail(task: vscode.Task): string{
   let cmd_string = task.definition.cmd ? `$(terminal) ${task.definition.cmd}` : `$(references) ${task.definition.taskInfo.depends_on.join(" && ")}`;
   let detail =  task.definition.description ? `$(info) ${task.definition.description}; ${cmd_string}` : cmd_string
-  console.log("Task Detail", detail);
   return detail;
 }
 

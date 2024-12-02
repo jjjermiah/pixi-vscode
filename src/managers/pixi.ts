@@ -20,17 +20,21 @@ export class Pixi {
     this.getPixiInfo().then((result) => {
       if (result && this._pixiInfo?.project_info) {
         log.info('Valid Pixi manifest at ', manifestPath);
-        log.info(result);
+        log.debug('Pixi Info:', {
+          project: this._pixiInfo.project_info,
+          environments: this._pixiInfo.environments_info.map((env) => {
+            `name: ${env.name}, prefix: ${env.prefix}, features: ${env.features}, tasks: ${env.tasks.length}, dependencies: ${concat(env.dependencies,env.pypi_dependencies)}`
+          })
+        });
+        this.getPixiTaskEnvironments().then((result) => {
+          if (result && this.pixiTaskInfo.length > 0) {
+            log.info(`Pixi Task Environments initialized for ${this.projectName()} with ${this.pixiTaskInfo.length} tasks`);
+          } else {
+            log.warn('Failed to initialize Pixi Task Environments', manifestPath);
+          }
+        });
       } else {
         log.warn('Invalid Pixi manifest at ', manifestPath);
-      }
-    });
-
-    this.getPixiTaskEnvironments().then((result) => {
-      if (result && this.pixiTaskInfo.length > 0) {
-        log.info(`Pixi Task Environments initialized for ${this.projectName()} with ${this.pixiTaskInfo.length} tasks`);
-      } else {
-        log.warn('Failed to initialize Pixi Task Environments');
       }
     });
 
@@ -144,4 +148,8 @@ export class Pixi {
   public Features(manifestPath?: string): string[] {
     return this.pixiInfo.environments_info.flatMap((env) => env.features);
   }
+}
+
+function concat(dependencies: any[], pypi_dependencies: any[]): any[] {
+  return [...dependencies, ...pypi_dependencies];
 }
