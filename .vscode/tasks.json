@@ -1,19 +1,14 @@
 {
 	"tasks": [
 		{
-			"type": "Pixi",
-			"task": "compile",
-			"cmd": "yarn run compile",
-			"environment": "default",
-			"project": "pixi-vscode",
-			"manifestPath": "/Users/bhklab/dev/GitHub/pixi-vscode/pixi.toml",
+			"type": "npm",
+			"script": "compile",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
 			"problemMatcher": [],
-			"label": "Pixi (default): compile",
-			"detail": "$(terminal) yarn run compile"
+			"label": "npm: watch",
 		}
 	]
 }

@@ -5,16 +5,19 @@ import * as vscode from "vscode";
 import { info, warn, error } from "./common/notification";
 
 import * as log from "./common/logging";
-import { getWorkspaceFiles, findPixiProjects } from "./common/filesystem";
+import {findPixiProjects } from "./common/filesystem";
 import { EXTENSION_NAME } from "./common/constants";
 import { createOutputChannel } from "./common/vscode";
 import {PixiTaskProvider} from "./taskProvider/pixiTaskProvider";
+import { PixiExtensionService } from "./extensionServices/pixi-extensionservice";
 // import { PixiTaskProvider } from "./taskProvider/pixiTaskProvider";
 // import { PixiTaskTreeProvider } from "./treeProvider/task_tree";
 import { PixiSearchDepth } from "./config";
 
 
 const Cache = require("vscode-cache");
+
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
@@ -30,8 +33,9 @@ export async function activate(context: vscode.ExtensionContext) {
   const command = "pixi-vscode.helloWorld";
 
   const commandHandler = async (name: string = 'world') => {
-    let tasks = await vscode.tasks.fetchTasks({type: 'Pixi'});
-    console.log(tasks.map(t => t.definition));
+    const service = new PixiExtensionService(
+    )
+    const result = await service.showTasks();
   };
 
 
