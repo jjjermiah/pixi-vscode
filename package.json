@@ -108,14 +108,6 @@
       {
         "command": "pixi-vscode.helloWorld",
         "title": "Pixi: Hello World"
-      },
-      {
-        "command": "pixi-vscode.logs",
-        "title": "Pixi: Logs"
-      },
-      {
-        "command": "pixi-vscode.init",
-        "title": "Pixi: Init"
       }
     ],
     "taskDefinitions": [
@@ -140,6 +132,10 @@
           "cmd": {
             "type": "string",
             "description": "The defined command to run the task"
+          },
+          "feature": {
+            "type": "string",
+            "description": "The feature the task is associated with"
           },
           "environment": {
             "type": "string",

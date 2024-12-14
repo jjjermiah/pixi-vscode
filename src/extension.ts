@@ -27,18 +27,20 @@ export async function activate(context: vscode.ExtensionContext) {
   // Tell user 
   info(`Found ${pixi_projects.length} pixi projects in workspace`);
 
+  const command = "pixi-vscode.helloWorld";
+
+  const commandHandler = async (name: string = 'world') => {
+    let tasks = await vscode.tasks.fetchTasks({type: 'Pixi'});
+    console.log(tasks.map(t => t.definition));
+  };
+
+
+  context.subscriptions.push(vscode.commands.registerCommand(command, commandHandler));
   // Log the projects
   log.debug(`Extension Activation: Found ${pixi_projects.length} pixi projects:`, pixi_projects);
 
   let pixiTaskProvider = vscode.tasks.registerTaskProvider("Pixi", new PixiTaskProvider(pixi_projects));
   context.subscriptions.push(pixiTaskProvider);
-
-  // context.subscriptions.push(
-  //   vscode.window.registerTreeDataProvider(
-  //     "pixi_explorer",
-  //     new PixiTaskTreeProvider()
-  //   )
-  // );
 
 }
 
