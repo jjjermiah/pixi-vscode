@@ -2,48 +2,54 @@ import * as vscode from "vscode";
 import * as log from "../common/logging";
 import { execShellWithTimeout } from "../common/shell";
 import { PixiPlatform, PixiProjectType } from "../enums";
-import { PixiInfo, EnvFeatureTaskList  } from "../types";
+import { PixiInfo, EnvFeatureTaskList } from "../types";
 import { PixiToolPath } from "../config";
 
 export class Pixi {
-  // save the output of the pixi info command
-  // public pixiInfo!: PixiInfo;
   private _pixiInfo?: PixiInfo;
   public pixiTaskInfo!: EnvFeatureTaskList[];
   public manifestPath: string;
 
   constructor(manifestPath: string) {
     this.manifestPath = manifestPath;
+    this.initializePixiInfo();
+    this.setupFileWatcher();
+  }
 
-    // Check if the manifest is valid
-
-    this.getPixiInfo().then((result) => {
+  private async initializePixiInfo(): Promise<void> {
+    try {
+      const result = await this.getPixiInfo();
       if (result && this._pixiInfo?.project_info) {
-        log.info('Valid Pixi manifest at ', manifestPath);
+        log.info('Valid Pixi manifest at ', this.manifestPath);
         log.debug('Pixi Info:', {
           project: this._pixiInfo.project_info,
-          environments: this._pixiInfo.environments_info.map((env) => {
-            `name: ${env.name}, prefix: ${env.prefix}, features: ${env.features}, tasks: ${env.tasks.length}, dependencies: ${concat(env.dependencies,env.pypi_dependencies)}`
-          })
+          environments: this._pixiInfo.environments_info.map((env) => ({
+            name: env.name,
+            prefix: env.prefix,
+            features: env.features,
+            tasks: env.tasks.length,
+            dependencies: concat(env.dependencies, env.pypi_dependencies)
+          }))
         });
-        this.getPixiTaskEnvironments().then((result) => {
-          if (result && this.pixiTaskInfo.length > 0) {
-            log.info(`Pixi Task Environments initialized for ${this.projectName()} with ${this.pixiTaskInfo.length} tasks`);
-          } else {
-            log.warn('Failed to initialize Pixi Task Environments', manifestPath);
-          }
-        });
+        const taskResult = await this.getPixiTaskEnvironments();
+        if (taskResult && this.pixiTaskInfo.length > 0) {
+          log.info(`Pixi Task Environments initialized for ${this.projectName()} with ${this.pixiTaskInfo.length} tasks`);
+        } else {
+          log.warn('Failed to initialize Pixi Task Environments', this.manifestPath);
+        }
       } else {
-        log.warn('Invalid Pixi manifest at ', manifestPath);
+        log.warn('Invalid Pixi manifest at ', this.manifestPath);
       }
-    });
+    } catch (error) {
+      log.error('Error initializing Pixi Info', error);
+    }
+  }
 
-    const fileWatcher = vscode.workspace.createFileSystemWatcher(
-      manifestPath || ""
-    );
+  private setupFileWatcher(): void {
+    const fileWatcher = vscode.workspace.createFileSystemWatcher(this.manifestPath || "");
     fileWatcher.onDidChange(() => this.reset());
     fileWatcher.onDidDelete(() => {
-      log.error(`Manifest file ${manifestPath} was deleted`);
+      log.error(`Manifest file ${this.manifestPath} was deleted`);
     });
   }
 
@@ -73,24 +79,17 @@ export class Pixi {
   }
 
   public async getPixiInfo(): Promise<PixiInfo> {
-    // Implementation for fetching PixiInfo
-    this.pixiInfo = await execShellWithTimeout(
-      `${PixiToolPath} info --manifest-path ${this.manifestPath} --json`,
-      5000
-    )
-      .then((output) => {
-        try {
-          return JSON.parse(output) as PixiInfo;
-        } catch (error) {
-          throw new Error("Failed to parse PixiInfo");
-        }
-      })
-      .catch((error) => {
-        log.warn("Pixi info Error", error);
-        throw new Error("Failed to fetch PixiInfo");
-      });
-    
-    return this.pixiInfo;
+    try {
+      const output = await execShellWithTimeout(
+        `${PixiToolPath} info --manifest-path ${this.manifestPath} --json`,
+        5000
+      );
+      this.pixiInfo = JSON.parse(output) as PixiInfo;
+      return this.pixiInfo;
+    } catch (error) {
+      log.warn("Pixi info Error", error);
+      throw new Error("Failed to fetch PixiInfo");
+    }
   }
 
   public projectName(): string {
@@ -103,38 +102,29 @@ export class Pixi {
     }
     return this._pixiInfo;
   }
-  
+
   public set pixiInfo(value: PixiInfo) {
     this._pixiInfo = value;
   }
-
 
   public async getPixiTaskEnvironments(force: boolean = false): Promise<EnvFeatureTaskList[]> {
     if (!force && this.pixiTaskInfo && this.pixiTaskInfo.length > 0) {
       return this.pixiTaskInfo;
     }
-    if(force){
+    if (force) {
       log.debug("Forcing Pixi Task Environments refresh");
     }
-    // it will defiinitely return a valu,e or `No tasks found` if no tasks are found
-    let pixiTaskInfo = await execShellWithTimeout(
-        `${PixiToolPath} task --manifest-path ${this.manifestPath} list --json `,
+    try {
+      const output = await execShellWithTimeout(
+        `${PixiToolPath} task --manifest-path ${this.manifestPath} list --json`,
         5000
-      )
-      .then((output) => {
-        try {
-          return JSON.parse(output) as EnvFeatureTaskList[];
-        } catch (error) {
-          log.debug("Failed to parse PixiTaskInfo");
-          return [];
-        }
-      })
-      .catch((error) => {
-        log.debug("Failed to retrieve PixiTaskInfo", this.manifestPath, error);
-        return [];  
-      });
-    this.pixiTaskInfo = pixiTaskInfo;
-    return this.pixiTaskInfo;
+      );
+      this.pixiTaskInfo = JSON.parse(output) as EnvFeatureTaskList[];
+      return this.pixiTaskInfo;
+    } catch (error) {
+      log.debug("Failed to retrieve PixiTaskInfo", this.manifestPath, error);
+      return [];
+    }
   }
 
   public EnvironmentNames(): string[] {
