@@ -1,8 +1,8 @@
 {
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "compile",
+			"command": "pixi", 
+			"args": ["run", "compile"],
 			"group": {
 				"kind": "build",
 				"isDefault": true

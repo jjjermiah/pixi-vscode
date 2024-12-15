@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import * as log from "./common/logging";
 import * as notif from "./common/notification";
 import { getConfiguration } from "./common/vscode";
