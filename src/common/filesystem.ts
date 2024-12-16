@@ -45,7 +45,7 @@ export async function getWorkspaceFiles(
 ): Promise<string[]> {
 	const folderPath = workspaceFolder.uri.fsPath;
 	const includePattern = new vscode.RelativePattern(folderPath, "**/*.{toml}");
-	const excludePattern = `{${config.PixiIgnore.join(",")}}`;
+	const excludePattern = `{${config.PixiIgnore.join(",")},**/.pixi/**}`;
 
 	const files = await workspace.findFiles(includePattern, excludePattern, undefined);
 	const filePaths = files.map(file => file.fsPath);
