@@ -82,16 +82,7 @@
             "default": "",
             "description": "The path to the Pixi executable"
           },
-          "pixi-vscode.projects.searchDepth": {
-            "type": "number",
-            "default": 3,
-            "description": "The depth to search for Pixi projects"
-          },
-          "pixi-vscode.projects.gitignore": {
-            "type": "boolean",
-            "default": true,
-            "description": "Whether to use .gitignore files to ignore files from Pixi projects, useful to ignore local envs (i.e .pixi)"
-          },
+
           "pixi-vscode.projects.ignore": {
             "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
             "type": "array",
@@ -106,8 +97,8 @@
     ],
     "commands": [
       {
-        "command": "pixi-vscode.helloWorld",
-        "title": "Pixi: Hello World"
+        "command": "pixi-vscode.init",
+        "title": "Pixi: Init"
       }
     ],
     "taskDefinitions": [
