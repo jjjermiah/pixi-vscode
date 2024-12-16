@@ -135,7 +135,7 @@ export class Pixi {
     return this.pixiInfo.environments_info.map((env) => env.prefix);
   }
 
-  public Features(manifestPath?: string): string[] {
+  public Features(): string[] {
     return this.pixiInfo.environments_info.flatMap((env) => env.features);
   }
 }

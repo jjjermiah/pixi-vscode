@@ -41,24 +41,6 @@ export function createOutputChannel(name: string): LogOutputChannel {
 export function getConfiguration(section: string, scope?: ConfigurationScope): WorkspaceConfiguration {
   return workspace.getConfiguration(section, scope);
 }
-
-/**
- * Registers a command that can be invoked via the command palette or keybindings.
- * 
- * @param command - The identifier of the command.
- * @param callback - The callback function to execute when the command is invoked.
- * @param thisArg - Optional 'this' context for the callback.
- * @returns A Disposable that unregisters the command when disposed.
- * 
- * Example usage:
- * registerCommand('myExtension.sayHello', () => {
- *   window.showInformationMessage('Hello, World!');
- * });
- */
-export function registerCommand(command: string, callback: (...args: any[]) => any, thisArg?: any): Disposable {
-  return commands.registerCommand(command, callback, thisArg);
-}
-
 /**
  * Checks if the current workspace is a virtual workspace.
  * 
@@ -72,37 +54,6 @@ export function registerCommand(command: string, callback: (...args: any[]) => a
 export function isVirtualWorkspace(): boolean {
   const isVirtual = workspace.workspaceFolders && workspace.workspaceFolders.every((f) => f.uri.scheme !== 'file');
   return !!isVirtual;
-}
-
-/**
- * Retrieves the list of workspace folders.
- * 
- * @returns An array of WorkspaceFolder instances.
- * 
- * Example usage:
- * const folders = getWorkspaceFolders();
- * folders.forEach(folder => {
- *   console.log(`Workspace folder: ${folder.name}`);
- * });
- */
-export function getWorkspaceFolders(): readonly WorkspaceFolder[] {
-  return workspace.workspaceFolders ?? [];
-}
-
-/**
- * Retrieves the workspace folder for a given URI.
- * 
- * @param uri - The URI to find the workspace folder for.
- * @returns The WorkspaceFolder instance or undefined if not found.
- * 
- * Example usage:
- * const folder = getWorkspaceFolder(Uri.parse('file:///path/to/file'));
- * if (folder) {
- *   console.log(`File is in workspace folder: ${folder.name}`);
- * }
- */
-export function getWorkspaceFolder(uri: Uri): WorkspaceFolder | undefined {
-  return workspace.getWorkspaceFolder(uri);
 }
 
 /**

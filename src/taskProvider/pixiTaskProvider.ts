@@ -4,7 +4,6 @@ import { Pixi } from "../managers/pixi";
 import { EnvFeatureTaskList, Feature, TaskInfo } from "../types";
 import * as log from "../common/logging";
 import { PixiToolPath } from "../config";
-import { getWorkspaceFolder } from "../common/vscode";
 import { PixiTaskDefinition } from "./pixiTaskDefinition";
 
 export class PixiTaskProvider implements vscode.TaskProvider {
@@ -147,7 +146,7 @@ function buildPixiTask(env: EnvFeatureTaskList, feature: Feature, task: TaskInfo
       new vscode.ShellExecution(
         `${PixiToolPath} run --manifest-path ${taskDefinition.manifestPath} --environment ${taskDefinition.environment} ${taskDefinition.task}`,
         {
-          cwd: getWorkspaceFolder(vscode.Uri.file(project.manifestPath))
+          cwd: vscode.workspace.getWorkspaceFolder(vscode.Uri.file(project.manifestPath))
             ?.uri.fsPath,
         }
       )
