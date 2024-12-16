@@ -26,9 +26,9 @@ jobs:
               pixi-version: v0.33.0
               cache: true
 
-#           - name: Run pytest
-#             run: |
-#               pixi run test
+          - name: Run pytest
+            run: |
+              pixi run test
 
     # lint:
     #     runs-on: ubuntu-latest
