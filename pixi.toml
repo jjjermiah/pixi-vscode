@@ -11,7 +11,7 @@ compile = "yarn run compile"
 install = "yarn install"
 pretest = { cmd = "yarn run pretest", depends_on = ["install"] }
 test = { cmd = "yarn run test", depends_on = ["pretest"] }
-
+vsce = "yarn vsce"
 
 [dependencies]
 nodejs = ">=22.9.0,<22.10"

@@ -82,7 +82,6 @@
             "default": "",
             "description": "The path to the Pixi executable"
           },
-
           "pixi-vscode.projects.ignore": {
             "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
             "type": "array",
