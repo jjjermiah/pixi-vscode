@@ -1,16 +1,184 @@
 import * as vscode from "vscode";
-import { PixiProjectType } from "./enums";
+import { PixiProjectType, PixiPlatform } from "./enums";
+import { showQuickPick } from "./common/vscode";
+import * as log from "./common/logging";
+import { PrefixClient } from "./prefixAPI/prefix-client";
+import { Pixi } from "./managers/pixi";
+
+const Cache = require("vscode-cache");
 
 interface ProjectConfig {
 	parentDir: vscode.Uri;
 	projectName: string;
 	projectType: string;
+	platforms?: string[];
+	channels?: string[];
 }
-export async function initPixiWorkspace() {
-	return async () => {
-		// check if there is a workspace open
-		if (vscode.workspace.workspaceFolders) {
 
+interface IProjectInitializer {
+	initPixiWorkspace(): Promise<void>;
+}
+
+class ProjectConfigurationCollector {
+	private cache: any;
+	private pixiProjects: Pixi[];
+
+	constructor(cache: any, pixiProjects: Pixi[]) {
+		this.cache = cache;
+		this.pixiProjects = pixiProjects;
+	}
+
+	public async collectProjectConfiguration(): Promise<ProjectConfig | undefined> {
+		const folderSelection = await vscode.window.showOpenDialog({
+			openLabel: "Initialize New Pixi Project in: ",
+			canSelectFiles: false,
+			canSelectFolders: true,
+			canSelectMany: false,
+		});
+		if (!folderSelection) {
+			return;
+		}
+
+		const tokenSource = new vscode.CancellationTokenSource();
+		const projectName = await this.promptForProjectName(tokenSource.token);
+		if (!projectName) {
+			return;
+		}
+
+		const projectType = await this.chooseProjectType();
+		if (!projectType) {
+			return;
+		}
+
+		const platforms = await this.getPlatforms();
+
+		return {
+			parentDir: folderSelection[0],
+			projectName,
+			projectType,
+			platforms,
+			channels: []
+		};
+	}
+
+	private async promptForProjectName(token: vscode.CancellationToken): Promise<string | undefined> {
+		const projectName = await vscode.window.showInputBox({
+			title: "Enter Project Name",
+			placeHolder: "Enter a project name."
+		}, token);
+		if (token.isCancellationRequested) {
+			log.debug("User cancelled project name input.");
+			return;
+		}
+		return projectName;
+	}
+
+	private async chooseProjectType(): Promise<string> {
+		const defaultProjectType: string = vscode.workspace
+			.getConfiguration("pixi-vscode")
+			.get("defaultProjectType") || "";
+
+		const projectTypes = Object.values(PixiProjectType).map(type => ({ label: type }));
+
+		const selectedProjectType = await showQuickPick({
+			title: `Select Project Type${defaultProjectType ? ` (Default: ${defaultProjectType})` : ""}`,
+			placeholder: `Default: ${defaultProjectType}`,
+			canSelectMany: false,
+			items: projectTypes,
+			value: defaultProjectType,
+		}).then(projectType => projectType[0]);
+
+		return selectedProjectType!;
+	}
+
+	private async getPlatforms(): Promise<string[]> {
+		const userPlatform = await this.pixiProjects[0].getPixiInfo().then(info => info.platform);
+		const defaultPlatforms: string[] = vscode.workspace
+			.getConfiguration("pixi-vscode.defaults")
+			.get<string[]>("defaultPlatforms", [])
+			.filter((platform) => platform !== userPlatform);
+
+		const previouslySelectedPlatforms: string[] = this.cache.get(
+			"selectedPlatforms",
+			[]
+		).filter((platform: any) => !defaultPlatforms.includes(platform));
+
+		log.info("User Platform: ", userPlatform);
+		log.info("Default Platforms: ", defaultPlatforms);
+		log.info("Previously selected platforms: ", previouslySelectedPlatforms);
+
+		const otherPlatforms = Object.values(PixiPlatform).filter((platform) => {
+			return ![
+				userPlatform,
+				...previouslySelectedPlatforms,
+				...defaultPlatforms,
+			].includes(platform);
+		});
+
+		const items = await this.prepareItems({
+			"Default Platforms": defaultPlatforms.map((platform: any) => ({
+				label: platform,
+				description: "(Added in settings)",
+			})),
+			"Previously Selected Platforms": previouslySelectedPlatforms.map(
+				(platform: any) => ({
+					label: platform,
+				})
+			),
+			"Other Platforms": otherPlatforms.map((platform: any) => ({
+					label: platform,
+			})),
+		});
+		const selectedPlatforms = await showQuickPick({
+			title: `Select Platform in addition to current platform: ${userPlatform}`,
+			placeholder: "Select Platform",
+			items: items,
+			canSelectMany: true,
+			selectedItems: items.filter((item) =>
+				defaultPlatforms.includes(item.label)
+			),
+		}).then((platforms) => {
+			this.cache.put("selectedPlatforms", [...previouslySelectedPlatforms, ...platforms]);
+			return platforms;
+		});
+
+		return [userPlatform || "", ...selectedPlatforms];
+	}
+
+	private async prepareItems(items: {
+		[key: string]: { label: string; description?: string }[];
+	}): Promise<vscode.QuickPickItem[]> {
+		const preparedItems: vscode.QuickPickItem[] = [];
+		for (const [label, values] of Object.entries(items)) {
+			preparedItems.push(await this.QPSeparator(label));
+			preparedItems.push(...values);
+		}
+		return preparedItems;
+	}
+
+	private async QPSeparator(label: string): Promise<vscode.QuickPickItem> {
+		return {
+			label: label,
+			kind: vscode.QuickPickItemKind.Separator,
+		};
+	}
+}
+
+export class PixiWorkspaceInitializer implements IProjectInitializer {
+	private cache: any;
+	private pixiProjects: Pixi[];
+	private prefixClient: PrefixClient = new PrefixClient();
+	private configCollector: ProjectConfigurationCollector;
+
+	constructor(cache: typeof Cache, pixiProjects: Pixi[]) {
+		this.cache = cache;
+		this.pixiProjects = pixiProjects.length > 0 ? pixiProjects : [new Pixi("pseudo_project")];
+		this.configCollector = new ProjectConfigurationCollector(cache, this.pixiProjects);
+	}
+
+	public async initPixiWorkspace(): Promise<void> {
+		console.log("Init Pixi Workspace");
+		if (vscode.workspace.workspaceFolders) {
 			const response = await vscode.window.showInformationMessage(
 				"Initialise a new Pixi project in the current workspace?",
 				"Yes",
@@ -22,134 +190,19 @@ export async function initPixiWorkspace() {
 			}
 		}
 
-		const projectConfig = await collectProjectConfiguration();
+		const projectConfig = await this.configCollector.collectProjectConfiguration();
 		if (!projectConfig) {
 			return;
 		}
 
-		await initializeProject(projectConfig);
-	};
-}
-
-
-async function collectProjectConfiguration(): Promise<ProjectConfig | undefined> {
-	const folderSelection = await openFolder();
-	if (!folderSelection) {
-		return;
+		await this.initializeProject(projectConfig);
 	}
 
-	const projectName = await promptForProjectName();
-	if (!projectName) {
-		return;
+	private async initializeProject(config: ProjectConfig): Promise<void> {
+		try {
+			console.log("Initializing Pixi project with config: ", config);
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to initialize Pixi workspace: ${error}`);
+		}
 	}
-
-	const projectType = await chooseProjectType();
-	if (!projectType) {
-		return;
-	}
-
-	return {
-		parentDir: folderSelection[0],
-		projectName,
-		projectType
-	};
-}
-
-async function initializeProject(config: ProjectConfig): Promise<void> {
-	try {
-		console.log(`Initializing Pixi project in ${config.parentDir.fsPath}`);
-		console.log(`Project Name: ${config.projectName}`);
-		console.log(`Project Type: ${config.projectType}`);
-	} catch (error) {
-		vscode.window.showErrorMessage(`Failed to initialize Pixi workspace: ${error}`);
-	}
-}
-// This method is called when your extension is deactivated
-
-export function deactivate() { }
-// ask user to choose a folder to open
-
-
-async function openFolder(): Promise<vscode.Uri[] | undefined> {
-	return await vscode.window.showOpenDialog({
-		openLabel: "Initialize New Pixi Project in: ",
-		canSelectFiles: false,
-		canSelectFolders: true,
-		canSelectMany: false,
-	});
-}
-/**
- * Displays a quick pick menu with the provided options and returns the selected
- * items as an array of strings.
- *
- * @param options - The options for the quick pick menu.
- * @returns A promise that resolves to an array of selected item labels.
- */
-
-async function showQuickPick(options: {
-	title: string;
-	placeholder: string;
-	items: vscode.QuickPickItem[];
-	canSelectMany: boolean;
-	step?: number;
-	totalSteps?: number;
-	selectedItems?: vscode.QuickPickItem[];
-	value?: string;
-}): Promise<string[]> {
-	const qp = vscode.window.createQuickPick(); // Add type parameter to createQuickPick
-	qp.title = options.title;
-	qp.placeholder = options.placeholder;
-	qp.items = options.items;
-	qp.canSelectMany = options.canSelectMany;
-	if (options.step) qp.step = options.step;
-	if (options.totalSteps) qp.totalSteps = options.totalSteps;
-	if (options.selectedItems) qp.selectedItems = options.selectedItems;
-	if (options.value) qp.value = options.value;
-	qp.show();
-	return new Promise((resolve) => {
-		qp.onDidAccept(() => {
-			let selections = qp.selectedItems;
-			qp.dispose();
-			resolve(selections.map((item) => item.label));
-		});
-	});
-}
-// TODO: unsure where to put this function ... only used during init. Maybe in the pixi-extensionservice?
-async function promptForProjectName(): Promise<string | undefined> {
-	const inputBox = vscode.window.createInputBox();
-	inputBox.title = "Enter Project Name";
-	inputBox.placeholder = "Enter a project name.";
-	inputBox.show();
-	const projectName = await new Promise<string>((resolve) => {
-		inputBox.onDidAccept(() => {
-			resolve(inputBox.value);
-			inputBox.dispose();
-		});
-	});
-	return projectName;
-}
-/**
- * Prompts the user to choose a project type and returns the selected project type.
- * If no project type is selected, the default project type is returned.
- * @returns A promise that resolves to the selected project type.
- */
-async function chooseProjectType(): Promise<string> {
-	const defaultProjectType: string = vscode.workspace
-		.getConfiguration("pixi-vscode")
-		.get("defaultProjectType") || PixiProjectType.Pixi;
-
-	const projectTypes = Object.values(PixiProjectType);
-
-	const selectedProjectType = await showQuickPick({
-		title: "Select Project Type",
-		placeholder: `Default : ${defaultProjectType}`,
-		canSelectMany: false,
-		items: projectTypes.map((type: any) => {
-			return {
-				label: type,
-			};
-		}),
-		value: defaultProjectType,
-	}).then((projectType) => projectType[0]);
-	return selectedProjectType!;
 }

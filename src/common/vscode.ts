@@ -1,30 +1,11 @@
 import {
-  commands,
   ConfigurationScope,
-  Disposable,
-  LogOutputChannel,
   TextEditor,
-  Uri,
   window,
   workspace,
   WorkspaceConfiguration,
-  WorkspaceFolder,
+  QuickPickItem,
 } from 'vscode';
-
-
-/**
- * Creates a new output channel with the specified name.
- * 
- * @param name - The name of the output channel.
- * @returns A LogOutputChannel instance.
- * 
- * Example usage:
- * const outputChannel = createOutputChannel('MyExtension');
- * outputChannel.appendLine('This is a log message');
- */
-export function createOutputChannel(name: string): LogOutputChannel {
-  return window.createOutputChannel(name, { log: true });
-}
 
 /**
  * Retrieves the configuration for the specified section.
@@ -70,3 +51,42 @@ export function isVirtualWorkspace(): boolean {
 export function getActiveTextEditor(): TextEditor | undefined {
   return window.activeTextEditor;
 }
+
+
+/**
+ * Displays a quick pick menu with the provided options and returns the selected
+ * items as an array of strings.
+ *
+ * @param options - The options for the quick pick menu.
+ * @returns A promise that resolves to an array of selected item labels.
+ */
+
+export async function showQuickPick(options: {
+  title: string;
+  placeholder: string;
+  items: QuickPickItem[];
+  canSelectMany: boolean;
+  step?: number;
+  totalSteps?: number;
+  selectedItems?: QuickPickItem[];
+  value?: string;
+}): Promise<string[]> {
+  const qp = window.createQuickPick(); // Add type parameter to createQuickPick
+  qp.title = options.title;
+  qp.placeholder = options.placeholder;
+  qp.items = options.items;
+  qp.canSelectMany = options.canSelectMany;
+  if (options.step) qp.step = options.step;
+  if (options.totalSteps) qp.totalSteps = options.totalSteps;
+  if (options.selectedItems) qp.selectedItems = options.selectedItems;
+  if (options.value) qp.value = options.value;
+  qp.show();
+  return new Promise((resolve) => {
+    qp.onDidAccept(() => {
+      let selections = qp.selectedItems;
+      qp.dispose();
+      resolve(selections.map((item) => item.label));
+    });
+  });
+}
+
