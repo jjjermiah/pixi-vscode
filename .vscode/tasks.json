@@ -1,14 +1,14 @@
 {
 	"tasks": [
 		{
-			"command": "pixi", 
-			"args": ["run", "compile"],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"command": "pixi",
+			"args": [
+				"run",
+				"compile"
+			],
+			"group": "build",
 			"problemMatcher": [],
-			"label": "npm: watch",
+			"label": "npm: watch"
 		}
 	]
 }

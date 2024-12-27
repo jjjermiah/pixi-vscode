@@ -1,7 +1,5 @@
 const gql = require("@apollo/client").gql;
 
-// Now you can use gql in your queries
-
 export const GET_PACKAGE_LATEST_VERSION = gql`
 	query GetPackageLatestVersion(
 		$channelName: String!
