@@ -9,3 +9,5 @@ cov/
 *.egg-info
 
 .yarn/install-state.gz
+.old
+old_package.json

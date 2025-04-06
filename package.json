@@ -4,7 +4,7 @@
   "description": "Pixi support for Visual Studio Code to manage Pixi projects",
   "icon": "assets/images/VSCode-Pixi-Logo.png",
   "publisher": "jjjermiah",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -25,111 +25,140 @@
     "Other"
   ],
   "preview": true,
-  "activationEvents": [],
+  "activationEvents": [
+    "workspaceContains:**/pyproject.toml",
+    "workspaceContains:**/pixi.toml"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": [
+      {
+        "title": "Pixi Defaults",
+        "properties": {
+          "pixi-vscode.prefixAPIKey": {
+            "type": "string",
+            "default": "",
+            "description": "The prefix API key"
+          },
+          "pixi-vscode.defaults.defaultProjectType": {
+            "type": "string",
+            "default": "pixi",
+            "enum": [
+              "pixi",
+              "pyproject"
+            ],
+            "description": "The default type of project to create when initializing a new Pixi project"
+          },
+          "pixi-vscode.defaults.defaultChannels": {
+            "description": "The default channels to use when creating a new project",
+            "type": "array",
+            "scope": "resource",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "conda-forge"
+            ]
+          },
+          "pixi-vscode.defaults.defaultPlatforms": {
+            "description": "The default platforms to use when creating a new project",
+            "type": "array",
+            "scope": "resource",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "osx-64",
+              "osx-arm64"
+            ]
+          }
+        }
+      },
+      {
+        "title": "Pixi Projects",
+        "properties": {
+          "pixi-vscode.executablePath": {
+            "type": "string",
+            "default": "",
+            "description": "The path to the Pixi executable"
+          },
+          "pixi-vscode.projects.ignore": {
+            "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
+            "type": "array",
+            "default": [],
+            "scope": "resource",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ],
     "commands": [
       {
         "command": "pixi-vscode.init",
         "title": "Pixi: Init"
-      },
-      {
-        "command": "pixi-vscode.addPackages",
-        "title": "Pixi: Add Packages"
-      },
-      {
-        "command": "pixi-vscode.addChannels",
-        "title": "Pixi: Add Channels"
-      },
-      {
-        "command": "pixi-vscode.addPyPiPackages",
-        "title": "Pixi: Add PyPi Packages"
-      },
-      {
-        "command": "pixi-vscode.clearCache",
-        "title": "Pixi: Clear Extension Cache"
-      },
-      {
-        "command": "pixi-vscode.setPythonInterpreter",
-        "title": "Pixi: Set Python Interpreter"
-      },
-      {
-        "command": "pixi-vscode.activateEnvironmentTerminal",
-        "title": "Pixi: Activate Environment in new Terminal"
       }
     ],
-    "menus": {
-      "explorer/context": [
+    "taskDefinitions": [
+      {
+        "type": "Pixi",
+        "required": [
+          "task",
+          "cmd",
+          "environment",
+          "project",
+          "manifestPath"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "The Pixi task to customize"
+          },
+          "description": {
+            "type": "string",
+            "description": "Possibly defined description of the task"
+          },
+          "cmd": {
+            "type": "string",
+            "description": "The defined command to run the task"
+          },
+          "feature": {
+            "type": "string",
+            "description": "The feature the task is associated with"
+          },
+          "environment": {
+            "type": "string",
+            "description": "The environment the task is associated with"
+          },
+          "project": {
+            "type": "string",
+            "description": "Project associated with the task"
+          },
+          "manifestPath": {
+            "type": "string",
+            "description": "Manifest path associated with the task"
+          }
+        }
+      }
+    ],
+    "views": {
+      "pixi": [
         {
-          "command": "pixi-vscode.init",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        },
-        {
-          "command": "pixi-vscode.addPackages",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        },
-        {
-          "command": "pixi-vscode.addPyPiPackages",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
-        },
-        {
-          "command": "pixi-vscode.addChannels",
-          "group": "1_pixi",
-          "when": "explorerResourceIsFolder"
+          "id": "pixi_explorer",
+          "name": "Pixi Project Tasks"
         }
       ]
     },
-    "configuration": {
-      "title": "Pixi",
-      "properties": {
-        "pixi-vscode.defaultProjectType": {
-          "type": "string",
-          "default": "pixi",
-          "enum": [
-            "pixi",
-            "pyproject"
-          ],
-          "description": "The default type of project to create"
-        },
-        "pixi-vscode.prefixAPIKey": {
-          "type": "string",
-          "default": "",
-          "description": "The prefix API key"
-        },
-        "pixi-vscode.defaultChannels": {
-          "description": "The default channels to use when creating a new project",
-          "type": "array",
-          "scope": "resource",
-          "items": {
-            "type": "string"
-          },
-          "default": [
-            "conda-forge"
-          ]
-        },
-        "pixi-vscode.defaultPlatforms": {
-          "description": "The default platforms to use when creating a new project",
-          "type": "array",
-          "scope": "resource",
-          "items": {
-            "type": "string"
-          },
-          "default": [
-            "osx-64",
-            "osx-arm64"
-          ]
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pixi",
+          "title": "Pixi",
+          "icon": "assets/images/VSCodePrefix-Dev-Logo.png"
         }
-      }
-    },
-    "viewsWelcome": [
-      {
-        "view": "workbench.explorer.emptyView",
-        "contents": "You can initialize a new Pixi Project with\n[New Pixi Project](command:pixi-vscode.init)\nChoose the folder to create a new Pixi Project in."
-      }
-    ]
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",
@@ -142,23 +171,37 @@
     "lint": "eslint src --ext ts",
     "test": "vscode-test --coverage true --coverage-output cov ./src/test"
   },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/test/runTest.js",
+      "dist/**"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "reporter": [
+      "html",
+      "text-summary"
+    ],
+    "all": true
+  },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
+    "@types/sinon": "^17.0.3",
     "@types/vscode": "^1.89.0",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "@vscode/test-cli": "^0.0.8",
     "@vscode/test-electron": "^2.3.9",
-    "conventional-changelog-conventionalcommits": "7.0.2",
+    "depcheck": "^1.4.7",
     "eslint": "^8.57.0",
-    "glob": "^10.3.14",
     "mocha": "^10.4.0",
     "nyc": "^15.1.0",
-    "semantic-release": "^23.1.1",
-    "semantic-release-vsce": "^5.7.1",
+    "sinon": "^19.0.2",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "vsce": "^2.15.0",
