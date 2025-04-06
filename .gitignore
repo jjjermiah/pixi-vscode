@@ -11,3 +11,4 @@ cov/
 .yarn/install-state.gz
 .old
 old_package.json
+sandbox
