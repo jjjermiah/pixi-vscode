@@ -9,8 +9,8 @@ version = "0.1.0"
 [tasks]
 compile = "yarn run compile"
 install = "yarn install"
-pretest = { cmd = "yarn run pretest", depends_on = ["install"] }
-test = { cmd = "yarn run test", depends_on = ["pretest"] }
+pretest = { cmd = "yarn run pretest", depends-on = ["install"] }
+package = { cmd = "vsce package --no-yarn" }
 vsce = "yarn vsce"
 
 [dependencies]
