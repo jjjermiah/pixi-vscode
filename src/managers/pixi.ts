@@ -1,7 +1,7 @@
 import { debug, info, warn, error } from "../common/logging";
 import * as shell from "../common/shell";
 import { PixiInfo } from "../types/pixi_info";
-import { getPixiExecutablePath } from "../common/config";
+import { getPixiExecutablePath } from "../config";
 import * as vscode from "vscode";
 
 export class Pixi {
