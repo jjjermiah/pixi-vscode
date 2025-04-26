@@ -1,162 +1,167 @@
 {
-  "name": "pixi-vscode2",
-  "publisher": "jjjermiah",
-  "displayName": "Pixi VSCode Integration",
-  "description": "VSCode extension for managing Pixi environments and projects",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.96.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "workspaceContains:**/pyproject.toml",
-    "workspaceContains:**/pixi.toml"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jjjermiah/pixi-vscode"
-  },
-  "bugs": {
-    "url": "https://github.com/jjjermiah/pixi-vscode/issues"
-  },
-  "homepage": "https://github.com/jjjermiah/pixi-vscode#readme",
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "pixi-vscode2.viewLogs",
-        "title": "Pixi: View Logs",
-        "icon": "$(output)"
-      },
-      {
-        "command": "pixi-vscode2.clearLogs",
-        "title": "Pixi: Clear Logs",
-        "icon": "$(arrow-up)"
-      }
-    ],
-    "menus": {
-      "view/item/context": [
-        {
-          "command": "pixi-vscode2.viewLogs",
-          "group": "inline",
-          "when": "view == env-managers && viewItem =~ /.*pythonEnvManager.*/"
-        },
-        {
-          "command": "pixi-vscode2.clearLogs",
-          "group": "inline",
-          "when": "view == env-managers && viewItem == python-package"
-        }
-      ]
+    "name": "pixi-vscode",
+    "publisher": "jjjermiah",
+    "displayName": "Pixi VSCode Integration",
+    "description": "VSCode extension for managing Pixi environments and projects",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.96.0"
     },
-    "configuration": [
-      {
-        "title": "Pixi Defaults",
-        "properties": {
-          "pixi-vscode.prefixAPIKey": {
-            "type": "string",
-            "default": "",
-            "description": "The prefix API key"
-          },
-          "pixi-vscode.defaults.defaultProjectType": {
-            "type": "string",
-            "default": "pixi",
-            "enum": [
-              "pixi",
-              "pyproject"
-            ],
-            "description": "The default type of project to create when initializing a new Pixi project"
-          },
-          "pixi-vscode.defaults.defaultChannels": {
-            "description": "The default channels to use when creating a new project",
-            "type": "array",
-            "scope": "resource",
-            "items": {
-              "type": "string"
-            },
-            "default": [
-              "conda-forge"
-            ]
-          },
-          "pixi-vscode.defaults.defaultPlatforms": {
-            "description": "The default platforms to use when creating a new project",
-            "type": "array",
-            "scope": "resource",
-            "items": {
-              "type": "string"
-            },
-            "default": [
-              "osx-64",
-              "osx-arm64"
-            ]
-          }
-        }
-      },
-      {
-        "title": "Pixi Projects",
-        "properties": {
-          "pixi-vscode.executablePath": {
-            "type": "string",
-            "default": "",
-            "description": "The path to the Pixi executable"
-          },
-          "pixi-vscode.projects.ignore": {
-            "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
-            "type": "array",
-            "default": [],
-            "scope": "resource",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      }
+    "categories": [
+        "Other"
     ],
-    "icons": {
-      "prefix-dev": {
-        "description": "Prefix Team Logo",
-        "default": {
-          "fontPath": "./assets/prefix-dev.woff",
-          "fontCharacter": "\\E800"
+    "activationEvents": [
+        "workspaceContains:**/pyproject.toml",
+        "workspaceContains:**/pixi.toml"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jjjermiah/pixi-vscode"
+    },
+    "bugs": {
+        "url": "https://github.com/jjjermiah/pixi-vscode/issues"
+    },
+    "homepage": "https://github.com/jjjermiah/pixi-vscode#readme",
+    "main": "./dist/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "pixi-vscode.viewLogs",
+                "title": "Pixi: View Logs",
+                "icon": "$(output)"
+            },
+            {
+                "command": "pixi-vscode.clearLogs",
+                "title": "Pixi: Clear Logs",
+                "icon": "$(arrow-up)"
+            },
+            {
+                "command": "pixi-vscode.findPixiProjects",
+                "title": "Pixi: Find Pixi Projects",
+                "icon": "$(search)"
+            }
+        ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "pixi-vscode.viewLogs",
+                    "group": "inline",
+                    "when": "view == env-managers && viewItem =~ /.*pythonEnvManager.*/"
+                },
+                {
+                    "command": "pixi-vscode.clearLogs",
+                    "group": "inline",
+                    "when": "view == env-managers && viewItem == python-package"
+                }
+            ]
+        },
+        "configuration": [
+            {
+                "title": "Pixi Defaults",
+                "properties": {
+                    "pixi-vscode.prefixAPIKey": {
+                        "type": "string",
+                        "default": "",
+                        "description": "The prefix API key"
+                    },
+                    "pixi-vscode.defaults.defaultProjectType": {
+                        "type": "string",
+                        "default": "pixi",
+                        "enum": [
+                            "pixi",
+                            "pyproject"
+                        ],
+                        "description": "The default type of project to create when initializing a new Pixi project"
+                    },
+                    "pixi-vscode.defaults.defaultChannels": {
+                        "description": "The default channels to use when creating a new project",
+                        "type": "array",
+                        "scope": "resource",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": [
+                            "conda-forge"
+                        ]
+                    },
+                    "pixi-vscode.defaults.defaultPlatforms": {
+                        "description": "The default platforms to use when creating a new project",
+                        "type": "array",
+                        "scope": "resource",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": [
+                            "osx-64",
+                            "osx-arm64"
+                        ]
+                    }
+                }
+            },
+            {
+                "title": "Pixi Projects",
+                "properties": {
+                    "pixi-vscode.executablePath": {
+                        "type": "string",
+                        "default": "",
+                        "description": "The path to the Pixi executable"
+                    },
+                    "pixi-vscode.projects.ignore": {
+                        "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
+                        "type": "array",
+                        "default": [],
+                        "scope": "resource",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        ],
+        "icons": {
+            "prefix-dev": {
+                "description": "Prefix Team Logo",
+                "default": {
+                    "fontPath": "./assets/prefix-dev.woff",
+                    "fontCharacter": "\\E800"
+                }
+            }
         }
-      }
+    },
+    "scripts": {
+        "vscode:prepublish": "yarn run package",
+        "compile": "webpack --mode=development",
+        "watch": "webpack --watch",
+        "package": "webpack --mode production --devtool hidden-source-map",
+        "compile-tests": "yarn install && tsc -p . --outDir out",
+        "watch-tests": "tsc -p . -w --outDir out",
+        "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+        "lint": "eslint src --ext ts",
+        "test": "yarn run pretest && vscode-test --install-extension 'ms-python.vscode-python-envs@0.1.2024121902' --pre-release "
+    },
+    "devDependencies": {
+        "@types/mocha": "^10.0.6",
+        "@types/node": "18.x",
+        "@types/react": "^19",
+        "@types/vscode": "^1.96.0",
+        "@typescript-eslint/eslint-plugin": "^7.7.1",
+        "@typescript-eslint/parser": "^7.7.1",
+        "@vscode/test-cli": "^0.0.8",
+        "@vscode/test-electron": "^2.3.9",
+        "@vscode/vsce": "^3.2.1",
+        "eslint": "^8.57.0",
+        "mocha": "11.1.0",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.8.3",
+        "vscode-extension-tester": "^8.10.0",
+        "webpack": "^5.91.0",
+        "webpack-cli": "^5.1.4"
+    },
+    "dependencies": {
+        "@apollo/client": "^3.12.4",
+        "axios": "^1.7.9",
+        "graphql": "^16.10.0",
+        "react": "^19.0.0",
+        "vscode-cache": "^0.3.0"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "yarn run package",
-    "compile": "webpack --mode=development",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "yarn install && tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
-    "lint": "eslint src --ext ts",
-    "test": "yarn run pretest && vscode-test --install-extension 'ms-python.vscode-python-envs@0.1.2024121902' --pre-release "
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.6",
-    "@types/node": "18.x",
-    "@types/react": "^19",
-    "@types/vscode": "^1.96.0",
-    "@typescript-eslint/eslint-plugin": "^7.7.1",
-    "@typescript-eslint/parser": "^7.7.1",
-    "@vscode/test-cli": "^0.0.8",
-    "@vscode/test-electron": "^2.3.9",
-    "@vscode/vsce": "^3.2.1",
-    "eslint": "^8.57.0",
-    "mocha": "11.1.0",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.8.3",
-    "vscode-extension-tester": "^8.10.0",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "@apollo/client": "^3.12.4",
-    "axios": "^1.7.9",
-    "graphql": "^16.10.0",
-    "react": "^19.0.0",
-    "vscode-cache": "^0.3.0"
-  }
 }

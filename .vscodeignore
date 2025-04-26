@@ -12,3 +12,8 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+.pixi 
+.old
+.sandbox
+.vscode-test
+.yarn
