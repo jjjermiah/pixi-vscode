@@ -5,9 +5,9 @@ runs:
     using: "composite"
     steps:
         - name: Install Pixi
-          uses: prefix-dev/setup-pixi@v0.8.1
+          uses: prefix-dev/setup-pixi@v0.8.8
           with:
-              pixi-version: v0.33.0
+              pixi-version: v0.46.0
               cache: true
 
         - name: Build VSIX
