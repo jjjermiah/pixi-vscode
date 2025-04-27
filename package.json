@@ -1,9 +1,9 @@
 {
     "name": "pixi-vscode",
     "publisher": "jjjermiah",
-    "displayName": "Pixi VSCode Integration",
+    "displayName": "Pixi VSCode",
     "description": "VSCode extension for managing Pixi environments and projects",
-    "version": "0.0.1",
+    "version": "1.99.0",
     "engines": {
         "vscode": "^1.96.0"
     },
@@ -57,7 +57,17 @@
         },
         "configuration": [
             {
-                "title": "Pixi Defaults",
+                "title": "Global Configuration",
+                "properties": {
+                    "pixi-vscode.executablePath": {
+                        "type": "string",
+                        "default": "",
+                        "description": "The path to the Pixi executable. i.e `${PIXI_HOME}/bin/pixi`"
+                    }
+                }
+            },
+            {
+                "title": "Defaults",
                 "properties": {
                     "pixi-vscode.prefixAPIKey": {
                         "type": "string",
@@ -99,21 +109,14 @@
                 }
             },
             {
-                "title": "Pixi Projects",
-                "properties": {
-                    "pixi-vscode.executablePath": {
-                        "type": "string",
-                        "default": "",
-                        "description": "The path to the Pixi executable"
-                    },
-                    "pixi-vscode.projects.ignore": {
-                        "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
-                        "type": "array",
-                        "default": [],
-                        "scope": "resource",
-                        "items": {
-                            "type": "string"
-                        }
+                "title": "Workspace Level Configuration",
+                "pixi-vscode.projects.ignore": {
+                    "description": "Additional ignores to use when searching for Pixi projects, useful to ignore toml files from i.e test directories",
+                    "type": "array",
+                    "default": [],
+                    "scope": "resource",
+                    "items": {
+                        "type": "string"
                     }
                 }
             }
