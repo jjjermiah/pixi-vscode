@@ -10,8 +10,12 @@ version = "0.1.0"
 compile = "yarn run compile"
 install = "yarn install"
 pretest = { cmd = "yarn run pretest", depends-on = ["install"] }
-package = { cmd = "vsce package --no-yarn" }
+package = { cmd = "vsce package --no-yarn", depends-on = [
+    "install",
+    "compile"
+] }
 vsce = "yarn vsce"
+clean = { description = "Clean up the npm and yarn directories", cmd = "yarn cache clean && rm -rf node_modules" }
 
 [dependencies]
 nodejs = ">=22.9.0,<22.10"
