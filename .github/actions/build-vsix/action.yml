@@ -23,7 +23,6 @@ runs:
         - name: Upload VSIX Pre-Release
           uses: actions/upload-artifact@v4
           with:
-              name: vsix
               path: ${{ env.VSIX_PATH }}
               if-no-files-found: error
               retention-days: 7
