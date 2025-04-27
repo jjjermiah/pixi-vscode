@@ -10,10 +10,7 @@ version = "0.1.0"
 compile = "yarn run compile"
 install = "yarn install"
 pretest = { cmd = "yarn run pretest", depends-on = ["install"] }
-package = { cmd = "vsce package --no-yarn", depends-on = [
-    "install",
-    "compile"
-] }
+package = { cmd = "npm run vscode:prepublish --no-yarn", depends-on = ["install"] }
 vsce = "yarn vsce"
 clean = { description = "Clean up the npm and yarn directories", cmd = "yarn cache clean && rm -rf node_modules" }
 
