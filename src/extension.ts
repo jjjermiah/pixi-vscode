@@ -91,26 +91,33 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(api.registerPackageManager(packageManager));
     context.subscriptions.push(api.registerEnvironmentManager(envManager));
 
-    // const packageManager = new PixiPackageManager(api, outputChannel);
-    // context.subscriptions.push(api.registerPackageManager(packageManager));
-    // // Register the Pixi Task Provider
-    // context.subscriptions.push(
-    //   vscode.tasks.registerTaskProvider(
-    //     "Pixi",
-    //     new PixiTaskProvider(pixi_projects)
-    //   )
-    // );
-
-    // const workspaceInitializer = new PixiWorkspaceInitializer(
-    //   cache,
-    //   pixi_projects
-    // );
-    // Register the Pixi Init command
-    // context.subscriptions.push(
-    //   vscode.commands.registerCommand("pixi-vscode.init", async () => {
-    //     await workspaceInitializer.initPixiWorkspace();
-    //   })
-    // );
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            "pixi-vscode.install",
+            () => {
+                const selection = vscode.window.showInformationMessage(
+                    "Would you like to install an environment?",
+                    {
+                        modal: true,
+                    },
+                    "default",
+                    "dev",
+                    "test",
+                    "py311",
+                    "py312",
+                    "py313",
+                    "docs",
+                );
+                if (selection !== undefined) {
+                    selection.then((value) => {
+                        notify.infoUser(
+                            `Pixi VScode Extension: You selected ${value}`
+                        );
+                    });
+                }
+            }
+        )
+    );
 }
 
 // This method is called when your extension is deactivated

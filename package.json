@@ -39,6 +39,11 @@
                 "command": "pixi-vscode.findPixiProjects",
                 "title": "Pixi: Find Pixi Projects",
                 "icon": "$(search)"
+            },
+            {
+                "command": "pixi-vscode.install",
+                "title": "Pixi: Notification Example",
+                "icon": "$(bell)"
             }
         ],
         "menus": {
@@ -46,12 +51,12 @@
                 {
                     "command": "pixi-vscode.viewLogs",
                     "group": "inline",
-                    "when": "view == env-managers && viewItem =~ /.*pythonEnvManager.*/"
+                    "when": "view == env-managers && viewItem =~ /.*pythonEnvGroup.*pixi.*/"
                 },
                 {
-                    "command": "pixi-vscode.clearLogs",
+                    "command": "pixi-vscode.install",
                     "group": "inline",
-                    "when": "view == env-managers && viewItem == python-package"
+                    "when": "view == env-managers && viewItem =~ /.*pythonEnvironment.*/"
                 }
             ]
         },
