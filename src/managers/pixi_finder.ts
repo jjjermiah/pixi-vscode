@@ -4,10 +4,7 @@ import * as log from "../common/logging";
 export async function findPixiProjects(): Promise<string[]> {
   const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
 
-  log.debug(
-    `Found ${workspaceFolders.length} workspace folders.`,
-    workspaceFolders
-  );
+  log.debug(`Found ${workspaceFolders.length} workspace folders.`, workspaceFolders);
 
   const pixiProjects = await Promise.all(
     workspaceFolders.map(async (folder) => {
@@ -21,6 +18,8 @@ export async function findPixiProjects(): Promise<string[]> {
 
   return pixiProjects.flat();
 }
+
+
 
 /**
  * Finds Pixi projects within the given workspace folder.
@@ -50,7 +49,9 @@ async function findPixiLocks(
  * @returns  URI of the manifest file (pixi.toml or pyproject.toml)
  * @throws Error if neither pixi.toml nor pyproject.toml is found
  */
-async function findManifestPath(pixiLockUri: vscode.Uri): Promise<string> {
+async function findManifestPath(
+  pixiLockUri: vscode.Uri
+): Promise<string> {
   const parentDir = vscode.Uri.joinPath(pixiLockUri, "..");
 
   // check if pixi.toml exists
@@ -77,3 +78,4 @@ async function findManifestPath(pixiLockUri: vscode.Uri): Promise<string> {
     "Neither pixi.toml nor pyproject.toml was found in the directory."
   );
 }
+

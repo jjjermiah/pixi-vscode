@@ -1,11 +1,45 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// https://github.com/microsoft/vscode-isort/blob/19c3556909612f515e3f933d4498dd1d1e63babe/src/common/logging.ts
 
 import * as util from "util";
 import { Disposable, LogOutputChannel } from "vscode";
 
 type Arguments = unknown[];
+/**
+ * ## OutputChannelLogger
+ *
+ * This module provides a logging utility class `OutputChannelLogger` that allows logging messages to a specified output channel.
+ * The logger supports various log levels including trace, error, warn, info, and verbose.
+ *
+ * ### Usage
+ *
+ * To use the `OutputChannelLogger`, you need to create an instance of it by passing a `LogOutputChannel` to its constructor.
+ *
+ * ```typescript
+ * import { OutputChannelLogger } from './logging';
+ * import { LogOutputChannel } from 'some-logging-library';
+ *
+ * const logChannel = new LogOutputChannel();
+ * const logger = new OutputChannelLogger(logChannel);
+ *
+ * logger.traceLog('This is a trace log message');
+ * logger.traceError('This is an error message');
+ * logger.traceWarn('This is a warning message');
+ * logger.traceInfo('This is an info message');
+ * logger.traceVerbose('This is a verbose message');
+ * ```
+ *
+ * ### Methods
+ *
+ * - `traceLog(...data: Arguments): void` - Logs a trace message.
+ * - `traceError(...data: Arguments): void` - Logs an error message.
+ * - `traceWarn(...data: Arguments): void` - Logs a warning message.
+ * - `traceInfo(...data: Arguments): void` - Logs an info message.
+ * - `traceVerbose(...data: Arguments): void` - Logs a verbose message.
+ *
+ * @class OutputChannelLogger
+ * @param {LogOutputChannel} channel - The output channel to which logs will be written.
+ */
 class OutputChannelLogger {
   constructor(private readonly channel: LogOutputChannel) {}
 
