@@ -261,8 +261,7 @@ export class PixiExtensionService {
 			);
 		} catch (err) {
 			notify.error(
-				`Python interpreter not found for environment ${selectedPythonEnv.name}` +
-					`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+				`Python interpreter not found for environment ${selectedPythonEnv.name}\nYou might need to pixi install -e ${selectedPythonEnv.name}`
 			);
 			return;
 		}
@@ -270,8 +269,7 @@ export class PixiExtensionService {
 		// check if the selected python path is valid and exists
 		if (!fs.existsSync(selectedPythonPath)) {
 			notify.error(
-				`Python interpreter path does not exist: ${selectedPythonPath}` +
-				`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+				`Python interpreter path does not exist: ${selectedPythonPath}\nYou might need to pixi install -e ${selectedPythonEnv.name}`
 			);
 			return;
 		}

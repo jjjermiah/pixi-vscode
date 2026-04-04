@@ -459,8 +459,8 @@ export class PixiService implements IPixiService {
 			title: "Select Pixi Manifest",
 			placeholder: "Multiple pixi manifests found – select one",
 			items: projectFiles.map((f) => ({
-				label: vscode.workspace.asRelativePath(f),
-				description: f.fsPath,
+				label: f.fsPath,
+				description: vscode.workspace.asRelativePath(f),
 			})),
 			canSelectMany: false,
 		});
@@ -469,10 +469,8 @@ export class PixiService implements IPixiService {
 			return "";
 		}
 
-		const selected = projectFiles.find(
-			(f) => vscode.workspace.asRelativePath(f) === chosen[0]
-		);
-		return selected ? selected.fsPath : "";
+		// chosen[0] is the fsPath (used as label above) – return it directly
+		return chosen[0];
 	}
 
 	// TODO: Get rid of these duplicate functions and just use the ones in the Pixi class
