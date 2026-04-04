@@ -359,7 +359,9 @@ export class PixiService implements IPixiService {
 			return platforms;
 		});
 
-		return [userPlatform || "", ...selectedPlatforms];
+		return [userPlatform, ...selectedPlatforms].filter(
+			(p): p is string => !!p
+		);
 	}
 
 	/**
@@ -425,9 +427,12 @@ export class PixiService implements IPixiService {
 	}
 
 	/**
-	 * Locate a pixi.toml or pyproject.toml file in a given directory and return the path to it.
+	 * Locate a pixi.toml or pyproject.toml file in a given directory (or its
+	 * subdirectories) and return the path to it.
+	 * If multiple manifests are found the user is prompted to choose one.
 	 * @param dir - The directory to search for the file.
-	 * @returns A promise that resolves to the path of the found file.
+	 * @returns A promise that resolves to the path of the found file, or an
+	 *          empty string if none was found.
 	 */
 	public async findProjectFile(dir: string): Promise<string> {
 		if (dir === undefined) {
@@ -435,17 +440,39 @@ export class PixiService implements IPixiService {
 			return "";
 		}
 
-		const projectFile = await vscode.workspace.findFiles(
-			new vscode.RelativePattern(dir, "{pixi,pyproject}.toml")
+		const projectFiles = await vscode.workspace.findFiles(
+			new vscode.RelativePattern(dir, "**/{pixi,pyproject}.toml")
 		);
 
-		if (projectFile) {
-			console.log("findProjectFile: Project file found");
-			return projectFile[0].fsPath;
+		if (!projectFiles || projectFiles.length === 0) {
+			console.log("findProjectFile: No project file found");
+			return "";
 		}
 
-		console.log("findProjectFile: No project file found");
-		return "";
+		if (projectFiles.length === 1) {
+			console.log("findProjectFile: Project file found");
+			return projectFiles[0].fsPath;
+		}
+
+		// Multiple manifests found – let the user choose one.
+		const chosen = await this.showQuickPick({
+			title: "Select Pixi Manifest",
+			placeholder: "Multiple pixi manifests found – select one",
+			items: projectFiles.map((f) => ({
+				label: vscode.workspace.asRelativePath(f),
+				description: f.fsPath,
+			})),
+			canSelectMany: false,
+		});
+
+		if (!chosen || chosen.length === 0) {
+			return "";
+		}
+
+		const selected = projectFiles.find(
+			(f) => vscode.workspace.asRelativePath(f) === chosen[0]
+		);
+		return selected ? selected.fsPath : "";
 	}
 
 	// TODO: Get rid of these duplicate functions and just use the ones in the Pixi class

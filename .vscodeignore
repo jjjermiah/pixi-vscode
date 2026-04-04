@@ -3,8 +3,12 @@
 out/**
 node_modules/**
 src/**
+.pixi/**
+pixi.toml
+pixi.lock
 .gitignore
 .yarnrc
+.yarnrc.yml
 webpack.config.js
 vsc-extension-quickstart.md
 **/tsconfig.json
