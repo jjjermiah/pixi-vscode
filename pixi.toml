@@ -1,4 +1,4 @@
-[project]
+[workspace]
 authors = ["Jermiah Joseph <jermiahjoseph98@gmail.com>"]
 channels = ["conda-forge"]
 description = "Add a short description here"
@@ -7,8 +7,8 @@ platforms = ["osx-arm64", "linux-64", "win-64"]
 
 [tasks]
 install = "yarn install"
-pretest = { cmd = "yarn run pretest", depends_on = ["install"] }
-test = { cmd = "yarn run test", depends_on = ["pretest"] }
+pretest = { cmd = "yarn run pretest", depends-on = ["install"] }
+test = { cmd = "yarn run test", depends-on = ["pretest"] }
 package = { cmd = "vsce package --no-yarn" }
 
 [dependencies]
