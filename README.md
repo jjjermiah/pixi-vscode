@@ -19,8 +19,8 @@ The prefix team is working on a [contribution to the official Python VSCode exte
 ## Features
 
 
-| Command Palette Command | Context Menu (right-click on folder)| Pixi Command | Description |
-| --- | --- | --- | --- |
+| Command Palette Command | Context Menu (right-click on folder) | Pixi Command | Description |
+|-------------------------|--------------------------------------|--------------|-------------|
 | `Pixi: Init` | `Pixi: Init` | `pixi init <project type> --platform <platform> --channel <channel> <PATH>` | Initialize a new Pixi project through an interactive menu to choose from available project types, platforms, and channels.
 | `Pixi: Add Channel` | `Pixi: Add Channel` | `pixi project channel add <channel>` | Add channels to an existing Pixi project through an interactive menu to choose from available channels.
 | `Pixi: Add Package` | `Pixi: Add Package` | `pixi add <package>` | Add packages to an existing Pixi project through an interactive menu to choose from available packages. |

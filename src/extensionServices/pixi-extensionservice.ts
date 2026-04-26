@@ -104,6 +104,10 @@ export class PixiExtensionService {
 		const manifestPath = await this.findManifestFile(
 			pixiProject.projectDir.fsPath
 		);
+		if (!manifestPath) {
+			notify.error("No pixi.toml or pyproject.toml found in the workspace folder");
+			return;
+		}
 
 		const existingChannels = await this.pixi_service.getChannels(manifestPath);
 		const args = await this.pixi_service.addChannel(existingChannels);
@@ -124,6 +128,10 @@ export class PixiExtensionService {
 			uri || (await this.vse.chooseWorkspaceFolder())!.uri;
 
 		const manifestPath = await this.findManifestFile(pixi_project_dir.fsPath);
+		if (!manifestPath) {
+			notify.error("No pixi.toml or pyproject.toml found in the workspace folder");
+			return;
+		}
 		const args = await this.pixi_service.addPackages();
 
 		const features = await this.pixi_service.getEnvironmentFeatures(
@@ -135,7 +143,7 @@ export class PixiExtensionService {
 
 		const chosenFeatures = await this.pixi_service.showQuickPick({
 			title: "Feature to add packages to",
-			items: features!.map((feature) => ({
+			items: (features || []).map((feature) => ({
 				label: feature,
 				description: "",
 			})),
@@ -159,6 +167,10 @@ export class PixiExtensionService {
 			uri || (await this.vse.chooseWorkspaceFolder())!.uri;
 
 		const manifestPath = await this.findManifestFile(pixi_project_dir.fsPath);
+		if (!manifestPath) {
+			notify.error("No pixi.toml or pyproject.toml found in the workspace folder");
+			return;
+		}
 
 		// for each package, the arg is "--pypi <package-name>"
 		const args = await this.pixi_service.addPyPiPackages();
@@ -176,7 +188,7 @@ export class PixiExtensionService {
 
 		const chosenFeatures = await this.pixi_service.showQuickPick({
 			title: "Feature to add packages to",
-			items: features!.map((feature) => ({
+			items: (features || []).map((feature) => ({
 				label: feature,
 				description: "",
 			})),
@@ -206,6 +218,12 @@ export class PixiExtensionService {
 		const manifestPath = await this.findManifestFile(
 			pixiProject.projectDir.fsPath
 		);
+		if (!manifestPath) {
+			notify.error(
+				"No pixi.toml or pyproject.toml found in the workspace folder"
+			);
+			return;
+		}
 		const envs = await this.pixi_service.getEnvironmentInfo(manifestPath);
 		if (!envs) {
 			notify.error("No environments found");
@@ -255,8 +273,7 @@ export class PixiExtensionService {
 			);
 		} catch (err) {
 			notify.error(
-				`Python interpreter not found for environment ${selectedPythonEnv.name}` +
-					`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+				`Python interpreter not found for environment ${selectedPythonEnv.name}\nYou might need to pixi install -e ${selectedPythonEnv.name}`
 			);
 			return;
 		}
@@ -264,8 +281,7 @@ export class PixiExtensionService {
 		// check if the selected python path is valid and exists
 		if (!fs.existsSync(selectedPythonPath)) {
 			notify.error(
-				`Python interpreter path does not exist: ${selectedPythonPath}` +
-				`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+				`Python interpreter path does not exist: ${selectedPythonPath}\nYou might need to pixi install -e ${selectedPythonEnv.name}`
 			);
 			return;
 		}
