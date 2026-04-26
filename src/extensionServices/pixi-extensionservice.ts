@@ -212,14 +212,27 @@ export class PixiExtensionService {
 			return;
 		}
 
-		// TODO refactor this... it's a bit messy
-		const items: vscode.QuickPickItem[] = await Promise.all(
-			envs.map(async (env: any) => ({
-				label: env.name,
-				description: await this.pixi_service.pixi.getPythonInterpreterPath(env),
-				detail: env.dependencies.join(", "),
-			}))
-		);
+		// Build quick pick items but skip environments that don't have a Python interpreter
+		// (getPythonInterpreterPath throws when the interpreter can't be found).
+		const items: vscode.QuickPickItem[] = [];
+		for (const env of envs) {
+			try {
+				const pythonPath = await this.pixi_service.pixi.getPythonInterpreterPath(env);
+				items.push({
+					label: env.name,
+					description: pythonPath,
+					detail: (env.dependencies || []).join(", "),
+				});
+			} catch (err) {
+				// skip environments without a python interpreter
+				console.log(`Skipping environment ${env.name}: ${err}`);
+			}
+		}
+
+		if (!items.length) {
+			notify.error("No environments with a Python interpreter were found");
+			return;
+		}
 
 		const selectedEnv = await this.pixi_service.showQuickPick({
 			title: "Select Environment",
@@ -235,8 +248,19 @@ export class PixiExtensionService {
 		if (!selectedPythonEnv) return;
 		console.log(`Selected Python Path: ${selectedPythonEnv.name}`);
 
-		const selectedPythonPath =
-			await this.pixi_service.pixi.getPythonInterpreterPath(selectedPythonEnv);
+		let selectedPythonPath: string;
+		try {
+			selectedPythonPath = await this.pixi_service.pixi.getPythonInterpreterPath(
+				selectedPythonEnv
+			);
+		} catch (err) {
+			notify.error(
+				`Python interpreter not found for environment ${selectedPythonEnv.name}` +
+					`\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+			);
+			return;
+		}
+
 		// check if the selected python path is valid and exists
 		if (!fs.existsSync(selectedPythonPath)) {
 			notify.error(
