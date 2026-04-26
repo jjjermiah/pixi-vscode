@@ -259,12 +259,12 @@ export class PixiExtensionService {
 			selectedPythonPath = await this.pixi_service.pixi.getPythonInterpreterPath(
 				selectedPythonEnv
 			);
-		} catch (err) {
-			notify.error(
-				`Python interpreter not found for environment ${selectedPythonEnv.name}\nYou might need to pixi install -e ${selectedPythonEnv.name}`
-			);
-			return;
-		}
+	} catch (err) {
+		notify.error(
+			`Python interpreter not found for environment ${selectedPythonEnv.name}\nYou might need to pixi install -e ${selectedPythonEnv.name}`
+		);
+		return;
+	}
 
 		// check if the selected python path is valid and exists
 		if (!fs.existsSync(selectedPythonPath)) {
